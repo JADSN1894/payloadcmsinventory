@@ -202,6 +202,7 @@ export interface Book {
   id: string;
   qtde: number;
   description: string;
+  coverImage?: (string | null) | Media;
   updatedAt: string;
   createdAt: string;
 }
@@ -350,6 +351,7 @@ export interface ExperimentsSelect<T extends boolean = true> {
 export interface BooksSelect<T extends boolean = true> {
   qtde?: T;
   description?: T;
+  coverImage?: T;
   updatedAt?: T;
   createdAt?: T;
 }

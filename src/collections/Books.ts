@@ -19,6 +19,15 @@ export const Books: CollectionConfig = {
       name: 'description',
       type: 'text',
       required: true,
-    }
+    },
+     {
+      name: 'coverImage',
+      type: 'upload',
+      relationTo: 'media',
+      // required: true,
+      filterOptions: {
+        mimeType: { contains: 'image' },
+      },
+    },
   ],
 }

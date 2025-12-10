@@ -141,6 +141,9 @@ export const books = pgTable(
     id: uuid('id').defaultRandom().primaryKey(),
     qtde: numeric('qtde', { mode: 'number' }).notNull().default(1),
     description: varchar('description').notNull(),
+    coverImage: uuid('cover_image_id').references(() => media.id, {
+      onDelete: 'set null',
+    }),
     updatedAt: timestamp('updated_at', { mode: 'string', withTimezone: true, precision: 3 })
       .defaultNow()
       .notNull(),
@@ -149,6 +152,7 @@ export const books = pgTable(
       .notNull(),
   },
   (columns) => [
+    index('books_cover_image_idx').on(columns.coverImage),
     index('books_updated_at_idx').on(columns.updatedAt),
     index('books_created_at_idx').on(columns.createdAt),
   ],
@@ -317,7 +321,13 @@ export const relations_experiments = relations(experiments, ({ one }) => ({
     relationName: 'coverImage',
   }),
 }))
-export const relations_books = relations(books, () => ({}))
+export const relations_books = relations(books, ({ one }) => ({
+  coverImage: one(media, {
+    fields: [books.coverImage],
+    references: [media.id],
+    relationName: 'coverImage',
+  }),
+}))
 export const relations_payload_kv = relations(payload_kv, () => ({}))
 export const relations_payload_locked_documents_rels = relations(
   payload_locked_documents_rels,
