@@ -13,19 +13,22 @@ import {
   uniqueIndex,
   foreignKey,
   integer,
+  uuid,
   varchar,
   timestamp,
-  serial,
   numeric,
   jsonb,
+  serial,
+  pgEnum,
 } from '@payloadcms/db-postgres/drizzle/pg-core'
 import { sql, relations } from '@payloadcms/db-postgres/drizzle'
+export const enum_experiments_status = pgEnum('enum_experiments_status', ['Draft', 'Published'])
 
 export const users_sessions = pgTable(
   'users_sessions',
   {
     _order: integer('_order').notNull(),
-    _parentID: integer('_parent_id').notNull(),
+    _parentID: uuid('_parent_id').notNull(),
     id: varchar('id').primaryKey(),
     createdAt: timestamp('created_at', { mode: 'string', withTimezone: true, precision: 3 }),
     expiresAt: timestamp('expires_at', {
@@ -48,7 +51,7 @@ export const users_sessions = pgTable(
 export const users = pgTable(
   'users',
   {
-    id: serial('id').primaryKey(),
+    id: uuid('id').defaultRandom().primaryKey(),
     updatedAt: timestamp('updated_at', { mode: 'string', withTimezone: true, precision: 3 })
       .defaultNow()
       .notNull(),
@@ -77,7 +80,7 @@ export const users = pgTable(
 export const media = pgTable(
   'media',
   {
-    id: serial('id').primaryKey(),
+    id: uuid('id').defaultRandom().primaryKey(),
     alt: varchar('alt').notNull(),
     updatedAt: timestamp('updated_at', { mode: 'string', withTimezone: true, precision: 3 })
       .defaultNow()
@@ -105,29 +108,25 @@ export const media = pgTable(
 export const experiments = pgTable(
   'experiments',
   {
-    id: serial('id').primaryKey(),
+    id: uuid('id').defaultRandom().primaryKey(),
     title: varchar('title').notNull(),
     slug: varchar('slug').notNull(),
     laboratoryNumber: numeric('laboratory_number', { mode: 'number' }).notNull().default(1),
-    description: varchar('description').notNull().default('Sem descrição'),
-    coverImage: integer('cover_image_id').references(() => media.id, {
+    description: jsonb('description')
+      .notNull()
+      .default(sql`'"Sem descrição"'::jsonb`),
+    contentSummary: varchar('content_summary').notNull(),
+    coverImage: uuid('cover_image_id').references(() => media.id, {
       onDelete: 'set null',
     }),
+    status: enum_experiments_status('status').notNull().default('Draft'),
+    publishedAt: timestamp('published_at', { mode: 'string', withTimezone: true, precision: 3 }),
     updatedAt: timestamp('updated_at', { mode: 'string', withTimezone: true, precision: 3 })
       .defaultNow()
       .notNull(),
     createdAt: timestamp('created_at', { mode: 'string', withTimezone: true, precision: 3 })
       .defaultNow()
       .notNull(),
-    url: varchar('url'),
-    thumbnailURL: varchar('thumbnail_u_r_l'),
-    filename: varchar('filename'),
-    mimeType: varchar('mime_type'),
-    filesize: numeric('filesize', { mode: 'number' }),
-    width: numeric('width', { mode: 'number' }),
-    height: numeric('height', { mode: 'number' }),
-    focalX: numeric('focal_x', { mode: 'number' }),
-    focalY: numeric('focal_y', { mode: 'number' }),
   },
   (columns) => [
     uniqueIndex('experiments_title_idx').on(columns.title),
@@ -135,14 +134,13 @@ export const experiments = pgTable(
     index('experiments_cover_image_idx').on(columns.coverImage),
     index('experiments_updated_at_idx').on(columns.updatedAt),
     index('experiments_created_at_idx').on(columns.createdAt),
-    uniqueIndex('experiments_filename_idx').on(columns.filename),
   ],
 )
 
 export const payload_kv = pgTable(
   'payload_kv',
   {
-    id: serial('id').primaryKey(),
+    id: uuid('id').defaultRandom().primaryKey(),
     key: varchar('key').notNull(),
     data: jsonb('data').notNull(),
   },
@@ -152,7 +150,7 @@ export const payload_kv = pgTable(
 export const payload_locked_documents = pgTable(
   'payload_locked_documents',
   {
-    id: serial('id').primaryKey(),
+    id: uuid('id').defaultRandom().primaryKey(),
     globalSlug: varchar('global_slug'),
     updatedAt: timestamp('updated_at', { mode: 'string', withTimezone: true, precision: 3 })
       .defaultNow()
@@ -173,11 +171,11 @@ export const payload_locked_documents_rels = pgTable(
   {
     id: serial('id').primaryKey(),
     order: integer('order'),
-    parent: integer('parent_id').notNull(),
+    parent: uuid('parent_id').notNull(),
     path: varchar('path').notNull(),
-    usersID: integer('users_id'),
-    mediaID: integer('media_id'),
-    experimentsID: integer('experiments_id'),
+    usersID: uuid('users_id'),
+    mediaID: uuid('media_id'),
+    experimentsID: uuid('experiments_id'),
   },
   (columns) => [
     index('payload_locked_documents_rels_order_idx').on(columns.order),
@@ -212,7 +210,7 @@ export const payload_locked_documents_rels = pgTable(
 export const payload_preferences = pgTable(
   'payload_preferences',
   {
-    id: serial('id').primaryKey(),
+    id: uuid('id').defaultRandom().primaryKey(),
     key: varchar('key'),
     value: jsonb('value'),
     updatedAt: timestamp('updated_at', { mode: 'string', withTimezone: true, precision: 3 })
@@ -234,9 +232,9 @@ export const payload_preferences_rels = pgTable(
   {
     id: serial('id').primaryKey(),
     order: integer('order'),
-    parent: integer('parent_id').notNull(),
+    parent: uuid('parent_id').notNull(),
     path: varchar('path').notNull(),
-    usersID: integer('users_id'),
+    usersID: uuid('users_id'),
   },
   (columns) => [
     index('payload_preferences_rels_order_idx').on(columns.order),
@@ -259,7 +257,7 @@ export const payload_preferences_rels = pgTable(
 export const payload_migrations = pgTable(
   'payload_migrations',
   {
-    id: serial('id').primaryKey(),
+    id: uuid('id').defaultRandom().primaryKey(),
     name: varchar('name'),
     batch: numeric('batch', { mode: 'number' }),
     updatedAt: timestamp('updated_at', { mode: 'string', withTimezone: true, precision: 3 })
@@ -352,6 +350,7 @@ export const relations_payload_preferences = relations(payload_preferences, ({ m
 export const relations_payload_migrations = relations(payload_migrations, () => ({}))
 
 type DatabaseSchema = {
+  enum_experiments_status: typeof enum_experiments_status
   users_sessions: typeof users_sessions
   users: typeof users
   media: typeof media

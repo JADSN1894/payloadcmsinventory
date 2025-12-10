@@ -4,16 +4,33 @@ import { Experiment } from '@/payload-types'
 import { FieldHook } from 'payload'
 import { slugify } from 'payload/shared'
 import { revalidateTag } from 'next/cache'
+import { convertLexicalToPlaintext } from '@payloadcms/richtext-lexical/plaintext'
 
 const generateSlugHook: FieldHook<Experiment, string> = ({ value, data }) => {
   if (value) return slugify(value.trim()) || ''
   return slugify(data?.title?.trim() || '') || ''
 }
 
-const CACHE_TAG_EXPERIMENTS = 'experiments';
+const generateDescriptionSummaryHook: FieldHook<Experiment, string> = ({ value, data }) => {
+  if (value) return value.trim()
+  if (!data?.description) return ''
+  const text = convertLexicalToPlaintext({ data: data?.description }).trim()
+  if (!text) return ''
+  return text.length > MAX_SUMMARY_LENGTH ? `${text.slice(0, MAX_SUMMARY_LENGTH - 3)}...` : text
+}
+
+const MAX_SUMMARY_LENGTH = 160
+
+const STATUS_OPTIONS = {
+  DRAFT: 'Draft',
+  PUBLISHED: 'Published',
+} as const
+
+const CACHE_TAG_EXPERIMENTS = 'experiments'
 
 export const Experiments: CollectionConfig = {
   slug: 'experiments',
+  // trash: true,
   // upload: {
   //   mimeTypes: ['image/*'],
   //   adminThumbnail: 'thumbnail',
@@ -42,9 +59,15 @@ export const Experiments: CollectionConfig = {
     },
     {
       name: 'description',
+      type: 'richText',
+      required: true,
+      // defaultValue: DefaultValue ,
+    },
+    {
+      name: 'contentSummary',
       type: 'textarea',
       required: true,
-      defaultValue: 'Sem descrição',
+      hooks: { beforeValidate: [generateDescriptionSummaryHook] },
     },
     {
       name: 'coverImage',
@@ -53,6 +76,22 @@ export const Experiments: CollectionConfig = {
       // required: true,
       filterOptions: {
         mimeType: { contains: 'image' },
+      },
+    },
+    {
+      name: 'status',
+      type: 'select',
+      required: true,
+      options: Object.values(STATUS_OPTIONS),
+      defaultValue: STATUS_OPTIONS.DRAFT,
+    },
+    {
+      name: 'publishedAt',
+      type: 'date',
+      required: true,
+      admin: {
+        condition: (data) => data?.status === STATUS_OPTIONS.PUBLISHED,
+        date: { pickerAppearance: 'dayAndTime' },
       },
     },
   ],

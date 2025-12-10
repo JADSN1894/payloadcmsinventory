@@ -26,13 +26,14 @@ export default buildConfig({
   },
   collections: [Users, Media, Experiments],
   editor: lexicalEditor({
-        features: ({ defaultFeatures }) => [...defaultFeatures, FixedToolbarFeature()],
+    features: ({ defaultFeatures }) => [...defaultFeatures, FixedToolbarFeature()],
   }),
   secret: process.env.PAYLOAD_SECRET || '',
   typescript: {
     outputFile: path.resolve(dirname, 'payload-types.ts'),
   },
   db: postgresAdapter({
+    idType: 'uuid',
     pool: {
       connectionString: process.env.DATABASE_URI || '',
     },
