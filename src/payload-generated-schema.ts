@@ -102,6 +102,43 @@ export const media = pgTable(
   ],
 )
 
+export const experiments = pgTable(
+  'experiments',
+  {
+    id: serial('id').primaryKey(),
+    title: varchar('title').notNull(),
+    slug: varchar('slug').notNull(),
+    laboratoryNumber: numeric('laboratory_number', { mode: 'number' }).notNull().default(1),
+    description: varchar('description').notNull().default('Sem descrição'),
+    coverImage: integer('cover_image_id').references(() => media.id, {
+      onDelete: 'set null',
+    }),
+    updatedAt: timestamp('updated_at', { mode: 'string', withTimezone: true, precision: 3 })
+      .defaultNow()
+      .notNull(),
+    createdAt: timestamp('created_at', { mode: 'string', withTimezone: true, precision: 3 })
+      .defaultNow()
+      .notNull(),
+    url: varchar('url'),
+    thumbnailURL: varchar('thumbnail_u_r_l'),
+    filename: varchar('filename'),
+    mimeType: varchar('mime_type'),
+    filesize: numeric('filesize', { mode: 'number' }),
+    width: numeric('width', { mode: 'number' }),
+    height: numeric('height', { mode: 'number' }),
+    focalX: numeric('focal_x', { mode: 'number' }),
+    focalY: numeric('focal_y', { mode: 'number' }),
+  },
+  (columns) => [
+    uniqueIndex('experiments_title_idx').on(columns.title),
+    uniqueIndex('experiments_slug_idx').on(columns.slug),
+    index('experiments_cover_image_idx').on(columns.coverImage),
+    index('experiments_updated_at_idx').on(columns.updatedAt),
+    index('experiments_created_at_idx').on(columns.createdAt),
+    uniqueIndex('experiments_filename_idx').on(columns.filename),
+  ],
+)
+
 export const payload_kv = pgTable(
   'payload_kv',
   {
@@ -140,6 +177,7 @@ export const payload_locked_documents_rels = pgTable(
     path: varchar('path').notNull(),
     usersID: integer('users_id'),
     mediaID: integer('media_id'),
+    experimentsID: integer('experiments_id'),
   },
   (columns) => [
     index('payload_locked_documents_rels_order_idx').on(columns.order),
@@ -147,6 +185,7 @@ export const payload_locked_documents_rels = pgTable(
     index('payload_locked_documents_rels_path_idx').on(columns.path),
     index('payload_locked_documents_rels_users_id_idx').on(columns.usersID),
     index('payload_locked_documents_rels_media_id_idx').on(columns.mediaID),
+    index('payload_locked_documents_rels_experiments_id_idx').on(columns.experimentsID),
     foreignKey({
       columns: [columns['parent']],
       foreignColumns: [payload_locked_documents.id],
@@ -161,6 +200,11 @@ export const payload_locked_documents_rels = pgTable(
       columns: [columns['mediaID']],
       foreignColumns: [media.id],
       name: 'payload_locked_documents_rels_media_fk',
+    }).onDelete('cascade'),
+    foreignKey({
+      columns: [columns['experimentsID']],
+      foreignColumns: [experiments.id],
+      name: 'payload_locked_documents_rels_experiments_fk',
     }).onDelete('cascade'),
   ],
 )
@@ -244,6 +288,13 @@ export const relations_users = relations(users, ({ many }) => ({
   }),
 }))
 export const relations_media = relations(media, () => ({}))
+export const relations_experiments = relations(experiments, ({ one }) => ({
+  coverImage: one(media, {
+    fields: [experiments.coverImage],
+    references: [media.id],
+    relationName: 'coverImage',
+  }),
+}))
 export const relations_payload_kv = relations(payload_kv, () => ({}))
 export const relations_payload_locked_documents_rels = relations(
   payload_locked_documents_rels,
@@ -262,6 +313,11 @@ export const relations_payload_locked_documents_rels = relations(
       fields: [payload_locked_documents_rels.mediaID],
       references: [media.id],
       relationName: 'media',
+    }),
+    experimentsID: one(experiments, {
+      fields: [payload_locked_documents_rels.experimentsID],
+      references: [experiments.id],
+      relationName: 'experiments',
     }),
   }),
 )
@@ -299,6 +355,7 @@ type DatabaseSchema = {
   users_sessions: typeof users_sessions
   users: typeof users
   media: typeof media
+  experiments: typeof experiments
   payload_kv: typeof payload_kv
   payload_locked_documents: typeof payload_locked_documents
   payload_locked_documents_rels: typeof payload_locked_documents_rels
@@ -308,6 +365,7 @@ type DatabaseSchema = {
   relations_users_sessions: typeof relations_users_sessions
   relations_users: typeof relations_users
   relations_media: typeof relations_media
+  relations_experiments: typeof relations_experiments
   relations_payload_kv: typeof relations_payload_kv
   relations_payload_locked_documents_rels: typeof relations_payload_locked_documents_rels
   relations_payload_locked_documents: typeof relations_payload_locked_documents

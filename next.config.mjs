@@ -4,7 +4,7 @@ import { withPayload } from '@payloadcms/next/withPayload'
 const nextConfig = {
     experimental: {
         serverActions: {
-          allowedOrigins: ['cautious-space-goggles-x6vj9xv7jgw2prwp-3000.app.github.dev','localhost:3000'], // Add your frontend origin here
+          allowedOrigins: ['supreme-space-acorn-9vjpqwjv96wf95rq.github.dev','localhost:3000'], // Add your frontend origin here
         },
       },
   // Your Next.js config here
