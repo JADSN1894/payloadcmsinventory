@@ -9,6 +9,7 @@ import { Users } from './collections/Users'
 import { Media } from './collections/Media'
 import { env } from './lib/env'
 import { Experiments } from './collections/Experiments'
+import { Books } from './collections/Books'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
@@ -24,7 +25,7 @@ export default buildConfig({
       password: env.CMS_SEED_ADMIN_PASSWORD,
     },
   },
-  collections: [Users, Media, Experiments],
+  collections: [Users, Media, Experiments, Books],
   editor: lexicalEditor({
     features: ({ defaultFeatures }) => [...defaultFeatures, FixedToolbarFeature()],
   }),
