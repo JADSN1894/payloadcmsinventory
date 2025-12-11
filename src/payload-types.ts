@@ -71,6 +71,7 @@ export interface Config {
     media: Media;
     experiments: Experiment;
     books: Book;
+    laboratories: Laboratory;
     'payload-kv': PayloadKv;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
@@ -82,13 +83,14 @@ export interface Config {
     media: MediaSelect<false> | MediaSelect<true>;
     experiments: ExperimentsSelect<false> | ExperimentsSelect<true>;
     books: BooksSelect<false> | BooksSelect<true>;
+    laboratories: LaboratoriesSelect<false> | LaboratoriesSelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
     'payload-migrations': PayloadMigrationsSelect<false> | PayloadMigrationsSelect<true>;
   };
   db: {
-    defaultIDType: string;
+    defaultIDType: number;
   };
   fallbackLocale: null;
   globals: {};
@@ -125,7 +127,7 @@ export interface UserAuthOperations {
  * via the `definition` "users".
  */
 export interface User {
-  id: string;
+  id: number;
   updatedAt: string;
   createdAt: string;
   email: string;
@@ -149,7 +151,7 @@ export interface User {
  * via the `definition` "media".
  */
 export interface Media {
-  id: string;
+  id: number;
   alt: string;
   updatedAt: string;
   createdAt: string;
@@ -168,7 +170,7 @@ export interface Media {
  * via the `definition` "experiments".
  */
 export interface Experiment {
-  id: string;
+  id: number;
   title: string;
   slug: string;
   laboratoryNumber: number;
@@ -188,9 +190,21 @@ export interface Experiment {
     [k: string]: unknown;
   };
   contentSummary: string;
-  coverImage?: (string | null) | Media;
+  coverImage?: (number | null) | Media;
   status: 'Draft' | 'Published';
   publishedAt?: string | null;
+  laboratory: number | Laboratory;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "laboratories".
+ */
+export interface Laboratory {
+  id: number;
+  title: string;
+  slug: string;
   updatedAt: string;
   createdAt: string;
 }
@@ -199,10 +213,10 @@ export interface Experiment {
  * via the `definition` "books".
  */
 export interface Book {
-  id: string;
+  id: number;
   qtde: number;
   description: string;
-  coverImage?: (string | null) | Media;
+  coverImage?: (number | null) | Media;
   updatedAt: string;
   createdAt: string;
 }
@@ -211,7 +225,7 @@ export interface Book {
  * via the `definition` "payload-kv".
  */
 export interface PayloadKv {
-  id: string;
+  id: number;
   key: string;
   data:
     | {
@@ -228,28 +242,32 @@ export interface PayloadKv {
  * via the `definition` "payload-locked-documents".
  */
 export interface PayloadLockedDocument {
-  id: string;
+  id: number;
   document?:
     | ({
         relationTo: 'users';
-        value: string | User;
+        value: number | User;
       } | null)
     | ({
         relationTo: 'media';
-        value: string | Media;
+        value: number | Media;
       } | null)
     | ({
         relationTo: 'experiments';
-        value: string | Experiment;
+        value: number | Experiment;
       } | null)
     | ({
         relationTo: 'books';
-        value: string | Book;
+        value: number | Book;
+      } | null)
+    | ({
+        relationTo: 'laboratories';
+        value: number | Laboratory;
       } | null);
   globalSlug?: string | null;
   user: {
     relationTo: 'users';
-    value: string | User;
+    value: number | User;
   };
   updatedAt: string;
   createdAt: string;
@@ -259,10 +277,10 @@ export interface PayloadLockedDocument {
  * via the `definition` "payload-preferences".
  */
 export interface PayloadPreference {
-  id: string;
+  id: number;
   user: {
     relationTo: 'users';
-    value: string | User;
+    value: number | User;
   };
   key?: string | null;
   value?:
@@ -282,7 +300,7 @@ export interface PayloadPreference {
  * via the `definition` "payload-migrations".
  */
 export interface PayloadMigration {
-  id: string;
+  id: number;
   name?: string | null;
   batch?: number | null;
   updatedAt: string;
@@ -341,6 +359,7 @@ export interface ExperimentsSelect<T extends boolean = true> {
   coverImage?: T;
   status?: T;
   publishedAt?: T;
+  laboratory?: T;
   updatedAt?: T;
   createdAt?: T;
 }
@@ -352,6 +371,16 @@ export interface BooksSelect<T extends boolean = true> {
   qtde?: T;
   description?: T;
   coverImage?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "laboratories_select".
+ */
+export interface LaboratoriesSelect<T extends boolean = true> {
+  title?: T;
+  slug?: T;
   updatedAt?: T;
   createdAt?: T;
 }

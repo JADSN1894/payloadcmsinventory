@@ -10,6 +10,7 @@ import { Media } from './collections/Media'
 import { env } from './lib/env'
 import { Experiments } from './collections/Experiments'
 import { Books } from './collections/Books'
+import { Laboratories } from './collections/Laboratory'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
@@ -25,7 +26,7 @@ export default buildConfig({
       password: env.CMS_SEED_ADMIN_PASSWORD,
     },
   },
-  collections: [Users, Media, Experiments, Books],
+  collections: [Users, Media, Experiments, Books, Laboratories],
   editor: lexicalEditor({
     features: ({ defaultFeatures }) => [...defaultFeatures, FixedToolbarFeature()],
   }),
@@ -34,7 +35,7 @@ export default buildConfig({
     outputFile: path.resolve(dirname, 'payload-types.ts'),
   },
   db: postgresAdapter({
-    idType: 'uuid',
+    idType: 'serial',
     pool: {
       connectionString: process.env.DATABASE_URI || '',
     },

@@ -13,12 +13,11 @@ import {
   uniqueIndex,
   foreignKey,
   integer,
-  uuid,
   varchar,
   timestamp,
+  serial,
   numeric,
   jsonb,
-  serial,
   pgEnum,
 } from '@payloadcms/db-postgres/drizzle/pg-core'
 import { sql, relations } from '@payloadcms/db-postgres/drizzle'
@@ -28,7 +27,7 @@ export const users_sessions = pgTable(
   'users_sessions',
   {
     _order: integer('_order').notNull(),
-    _parentID: uuid('_parent_id').notNull(),
+    _parentID: integer('_parent_id').notNull(),
     id: varchar('id').primaryKey(),
     createdAt: timestamp('created_at', { mode: 'string', withTimezone: true, precision: 3 }),
     expiresAt: timestamp('expires_at', {
@@ -51,7 +50,7 @@ export const users_sessions = pgTable(
 export const users = pgTable(
   'users',
   {
-    id: uuid('id').defaultRandom().primaryKey(),
+    id: serial('id').primaryKey(),
     updatedAt: timestamp('updated_at', { mode: 'string', withTimezone: true, precision: 3 })
       .defaultNow()
       .notNull(),
@@ -80,7 +79,7 @@ export const users = pgTable(
 export const media = pgTable(
   'media',
   {
-    id: uuid('id').defaultRandom().primaryKey(),
+    id: serial('id').primaryKey(),
     alt: varchar('alt').notNull(),
     updatedAt: timestamp('updated_at', { mode: 'string', withTimezone: true, precision: 3 })
       .defaultNow()
@@ -108,17 +107,22 @@ export const media = pgTable(
 export const experiments = pgTable(
   'experiments',
   {
-    id: uuid('id').defaultRandom().primaryKey(),
+    id: serial('id').primaryKey(),
     title: varchar('title').notNull(),
     slug: varchar('slug').notNull(),
     laboratoryNumber: numeric('laboratory_number', { mode: 'number' }).notNull().default(1),
     description: jsonb('description').notNull(),
     contentSummary: varchar('content_summary').notNull(),
-    coverImage: uuid('cover_image_id').references(() => media.id, {
+    coverImage: integer('cover_image_id').references(() => media.id, {
       onDelete: 'set null',
     }),
     status: enum_experiments_status('status').notNull().default('Draft'),
     publishedAt: timestamp('published_at', { mode: 'string', withTimezone: true, precision: 3 }),
+    laboratory: integer('laboratory_id')
+      .notNull()
+      .references(() => laboratories.id, {
+        onDelete: 'set null',
+      }),
     updatedAt: timestamp('updated_at', { mode: 'string', withTimezone: true, precision: 3 })
       .defaultNow()
       .notNull(),
@@ -130,6 +134,7 @@ export const experiments = pgTable(
     uniqueIndex('experiments_title_idx').on(columns.title),
     uniqueIndex('experiments_slug_idx').on(columns.slug),
     index('experiments_cover_image_idx').on(columns.coverImage),
+    index('experiments_laboratory_idx').on(columns.laboratory),
     index('experiments_updated_at_idx').on(columns.updatedAt),
     index('experiments_created_at_idx').on(columns.createdAt),
   ],
@@ -138,10 +143,10 @@ export const experiments = pgTable(
 export const books = pgTable(
   'books',
   {
-    id: uuid('id').defaultRandom().primaryKey(),
+    id: serial('id').primaryKey(),
     qtde: numeric('qtde', { mode: 'number' }).notNull().default(1),
     description: varchar('description').notNull(),
-    coverImage: uuid('cover_image_id').references(() => media.id, {
+    coverImage: integer('cover_image_id').references(() => media.id, {
       onDelete: 'set null',
     }),
     updatedAt: timestamp('updated_at', { mode: 'string', withTimezone: true, precision: 3 })
@@ -158,10 +163,31 @@ export const books = pgTable(
   ],
 )
 
+export const laboratories = pgTable(
+  'laboratories',
+  {
+    id: serial('id').primaryKey(),
+    title: varchar('title').notNull(),
+    slug: varchar('slug').notNull(),
+    updatedAt: timestamp('updated_at', { mode: 'string', withTimezone: true, precision: 3 })
+      .defaultNow()
+      .notNull(),
+    createdAt: timestamp('created_at', { mode: 'string', withTimezone: true, precision: 3 })
+      .defaultNow()
+      .notNull(),
+  },
+  (columns) => [
+    uniqueIndex('laboratories_title_idx').on(columns.title),
+    uniqueIndex('laboratories_slug_idx').on(columns.slug),
+    index('laboratories_updated_at_idx').on(columns.updatedAt),
+    index('laboratories_created_at_idx').on(columns.createdAt),
+  ],
+)
+
 export const payload_kv = pgTable(
   'payload_kv',
   {
-    id: uuid('id').defaultRandom().primaryKey(),
+    id: serial('id').primaryKey(),
     key: varchar('key').notNull(),
     data: jsonb('data').notNull(),
   },
@@ -171,7 +197,7 @@ export const payload_kv = pgTable(
 export const payload_locked_documents = pgTable(
   'payload_locked_documents',
   {
-    id: uuid('id').defaultRandom().primaryKey(),
+    id: serial('id').primaryKey(),
     globalSlug: varchar('global_slug'),
     updatedAt: timestamp('updated_at', { mode: 'string', withTimezone: true, precision: 3 })
       .defaultNow()
@@ -192,12 +218,13 @@ export const payload_locked_documents_rels = pgTable(
   {
     id: serial('id').primaryKey(),
     order: integer('order'),
-    parent: uuid('parent_id').notNull(),
+    parent: integer('parent_id').notNull(),
     path: varchar('path').notNull(),
-    usersID: uuid('users_id'),
-    mediaID: uuid('media_id'),
-    experimentsID: uuid('experiments_id'),
-    booksID: uuid('books_id'),
+    usersID: integer('users_id'),
+    mediaID: integer('media_id'),
+    experimentsID: integer('experiments_id'),
+    booksID: integer('books_id'),
+    laboratoriesID: integer('laboratories_id'),
   },
   (columns) => [
     index('payload_locked_documents_rels_order_idx').on(columns.order),
@@ -207,6 +234,7 @@ export const payload_locked_documents_rels = pgTable(
     index('payload_locked_documents_rels_media_id_idx').on(columns.mediaID),
     index('payload_locked_documents_rels_experiments_id_idx').on(columns.experimentsID),
     index('payload_locked_documents_rels_books_id_idx').on(columns.booksID),
+    index('payload_locked_documents_rels_laboratories_id_idx').on(columns.laboratoriesID),
     foreignKey({
       columns: [columns['parent']],
       foreignColumns: [payload_locked_documents.id],
@@ -232,13 +260,18 @@ export const payload_locked_documents_rels = pgTable(
       foreignColumns: [books.id],
       name: 'payload_locked_documents_rels_books_fk',
     }).onDelete('cascade'),
+    foreignKey({
+      columns: [columns['laboratoriesID']],
+      foreignColumns: [laboratories.id],
+      name: 'payload_locked_documents_rels_laboratories_fk',
+    }).onDelete('cascade'),
   ],
 )
 
 export const payload_preferences = pgTable(
   'payload_preferences',
   {
-    id: uuid('id').defaultRandom().primaryKey(),
+    id: serial('id').primaryKey(),
     key: varchar('key'),
     value: jsonb('value'),
     updatedAt: timestamp('updated_at', { mode: 'string', withTimezone: true, precision: 3 })
@@ -260,9 +293,9 @@ export const payload_preferences_rels = pgTable(
   {
     id: serial('id').primaryKey(),
     order: integer('order'),
-    parent: uuid('parent_id').notNull(),
+    parent: integer('parent_id').notNull(),
     path: varchar('path').notNull(),
-    usersID: uuid('users_id'),
+    usersID: integer('users_id'),
   },
   (columns) => [
     index('payload_preferences_rels_order_idx').on(columns.order),
@@ -285,7 +318,7 @@ export const payload_preferences_rels = pgTable(
 export const payload_migrations = pgTable(
   'payload_migrations',
   {
-    id: uuid('id').defaultRandom().primaryKey(),
+    id: serial('id').primaryKey(),
     name: varchar('name'),
     batch: numeric('batch', { mode: 'number' }),
     updatedAt: timestamp('updated_at', { mode: 'string', withTimezone: true, precision: 3 })
@@ -320,6 +353,11 @@ export const relations_experiments = relations(experiments, ({ one }) => ({
     references: [media.id],
     relationName: 'coverImage',
   }),
+  laboratory: one(laboratories, {
+    fields: [experiments.laboratory],
+    references: [laboratories.id],
+    relationName: 'laboratory',
+  }),
 }))
 export const relations_books = relations(books, ({ one }) => ({
   coverImage: one(media, {
@@ -328,6 +366,7 @@ export const relations_books = relations(books, ({ one }) => ({
     relationName: 'coverImage',
   }),
 }))
+export const relations_laboratories = relations(laboratories, () => ({}))
 export const relations_payload_kv = relations(payload_kv, () => ({}))
 export const relations_payload_locked_documents_rels = relations(
   payload_locked_documents_rels,
@@ -356,6 +395,11 @@ export const relations_payload_locked_documents_rels = relations(
       fields: [payload_locked_documents_rels.booksID],
       references: [books.id],
       relationName: 'books',
+    }),
+    laboratoriesID: one(laboratories, {
+      fields: [payload_locked_documents_rels.laboratoriesID],
+      references: [laboratories.id],
+      relationName: 'laboratories',
     }),
   }),
 )
@@ -396,6 +440,7 @@ type DatabaseSchema = {
   media: typeof media
   experiments: typeof experiments
   books: typeof books
+  laboratories: typeof laboratories
   payload_kv: typeof payload_kv
   payload_locked_documents: typeof payload_locked_documents
   payload_locked_documents_rels: typeof payload_locked_documents_rels
@@ -407,6 +452,7 @@ type DatabaseSchema = {
   relations_media: typeof relations_media
   relations_experiments: typeof relations_experiments
   relations_books: typeof relations_books
+  relations_laboratories: typeof relations_laboratories
   relations_payload_kv: typeof relations_payload_kv
   relations_payload_locked_documents_rels: typeof relations_payload_locked_documents_rels
   relations_payload_locked_documents: typeof relations_payload_locked_documents

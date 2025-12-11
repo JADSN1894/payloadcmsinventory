@@ -26,7 +26,7 @@ const STATUS_OPTIONS = {
   PUBLISHED: 'Published',
 } as const
 
-const CACHE_TAG_EXPERIMENTS = 'experiments'
+const CACHE_TAG = 'experiments'
 
 export const Experiments: CollectionConfig = {
   slug: 'experiments',
@@ -94,8 +94,15 @@ export const Experiments: CollectionConfig = {
         date: { pickerAppearance: 'dayAndTime' },
       },
     },
+    {
+      name: 'laboratory',
+      type: 'relationship',
+      relationTo: 'laboratories',
+      required: true,
+      defaultValue: 1,
+    },
   ],
   hooks: {
-    afterChange: [() => revalidateTag(CACHE_TAG_EXPERIMENTS)],
+    afterChange: [() => revalidateTag(CACHE_TAG)],
   },
 }

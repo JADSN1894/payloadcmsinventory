@@ -2,6 +2,7 @@
 
 data.csv
 data.json
+/experiments
 
 # dependencies
 /node_modules

@@ -5,7 +5,7 @@ import { faker } from '@faker-js/faker'
 import { getPayload } from 'payload'
 
 async function importData() {
-  const rawData = await readCSV('src/seeders/data.csv', ';')
+  const rawData = await readCSV('src/seeders/books/data.csv', ';')
   // const importData = JSON.parse(rawData)
   console.log(importData)
 

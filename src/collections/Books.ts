@@ -2,6 +2,7 @@ import type { CollectionConfig } from 'payload'
 
 export const Books: CollectionConfig = {
   slug: 'books',
+  defaultSort: 'id',
   admin: {
     pagination: {
       defaultLimit: 50,
