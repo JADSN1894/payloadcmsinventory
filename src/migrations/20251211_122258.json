@@ -361,20 +361,8 @@
           "primaryKey": true,
           "notNull": true
         },
-        "title": {
-          "name": "title",
-          "type": "varchar",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "slug": {
-          "name": "slug",
-          "type": "varchar",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "laboratory_number": {
-          "name": "laboratory_number",
+        "qtde": {
+          "name": "qtde",
           "type": "numeric",
           "primaryKey": false,
           "notNull": true,
@@ -382,12 +370,6 @@
         },
         "description": {
           "name": "description",
-          "type": "jsonb",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "content_summary": {
-          "name": "content_summary",
           "type": "varchar",
           "primaryKey": false,
           "notNull": true
@@ -397,26 +379,6 @@
           "type": "integer",
           "primaryKey": false,
           "notNull": false
-        },
-        "status": {
-          "name": "status",
-          "type": "enum_experiments_status",
-          "typeSchema": "public",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "'Draft'"
-        },
-        "published_at": {
-          "name": "published_at",
-          "type": "timestamp(3) with time zone",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "laboratory_id": {
-          "name": "laboratory_id",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true
         },
         "updated_at": {
           "name": "updated_at",
@@ -434,56 +396,11 @@
         }
       },
       "indexes": {
-        "experiments_title_idx": {
-          "name": "experiments_title_idx",
-          "columns": [
-            {
-              "expression": "title",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": true,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        },
-        "experiments_slug_idx": {
-          "name": "experiments_slug_idx",
-          "columns": [
-            {
-              "expression": "slug",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": true,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        },
         "experiments_cover_image_idx": {
           "name": "experiments_cover_image_idx",
           "columns": [
             {
               "expression": "cover_image_id",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": false,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        },
-        "experiments_laboratory_idx": {
-          "name": "experiments_laboratory_idx",
-          "columns": [
-            {
-              "expression": "laboratory_id",
               "isExpression": false,
               "asc": true,
               "nulls": "last"
@@ -529,131 +446,6 @@
         "experiments_cover_image_id_media_id_fk": {
           "name": "experiments_cover_image_id_media_id_fk",
           "tableFrom": "experiments",
-          "tableTo": "media",
-          "columnsFrom": [
-            "cover_image_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "set null",
-          "onUpdate": "no action"
-        },
-        "experiments_laboratory_id_laboratories_id_fk": {
-          "name": "experiments_laboratory_id_laboratories_id_fk",
-          "tableFrom": "experiments",
-          "tableTo": "laboratories",
-          "columnsFrom": [
-            "laboratory_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "set null",
-          "onUpdate": "no action"
-        }
-      },
-      "compositePrimaryKeys": {},
-      "uniqueConstraints": {},
-      "policies": {},
-      "checkConstraints": {},
-      "isRLSEnabled": false
-    },
-    "public.books": {
-      "name": "books",
-      "schema": "",
-      "columns": {
-        "id": {
-          "name": "id",
-          "type": "serial",
-          "primaryKey": true,
-          "notNull": true
-        },
-        "qtde": {
-          "name": "qtde",
-          "type": "numeric",
-          "primaryKey": false,
-          "notNull": true,
-          "default": 1
-        },
-        "description": {
-          "name": "description",
-          "type": "varchar",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "cover_image_id": {
-          "name": "cover_image_id",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "updated_at": {
-          "name": "updated_at",
-          "type": "timestamp(3) with time zone",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "now()"
-        },
-        "created_at": {
-          "name": "created_at",
-          "type": "timestamp(3) with time zone",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "now()"
-        }
-      },
-      "indexes": {
-        "books_cover_image_idx": {
-          "name": "books_cover_image_idx",
-          "columns": [
-            {
-              "expression": "cover_image_id",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": false,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        },
-        "books_updated_at_idx": {
-          "name": "books_updated_at_idx",
-          "columns": [
-            {
-              "expression": "updated_at",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": false,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        },
-        "books_created_at_idx": {
-          "name": "books_created_at_idx",
-          "columns": [
-            {
-              "expression": "created_at",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": false,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        }
-      },
-      "foreignKeys": {
-        "books_cover_image_id_media_id_fk": {
-          "name": "books_cover_image_id_media_id_fk",
-          "tableFrom": "books",
           "tableTo": "media",
           "columnsFrom": [
             "cover_image_id"
@@ -955,12 +747,6 @@
           "primaryKey": false,
           "notNull": false
         },
-        "books_id": {
-          "name": "books_id",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": false
-        },
         "laboratories_id": {
           "name": "laboratories_id",
           "type": "integer",
@@ -1059,21 +845,6 @@
           "method": "btree",
           "with": {}
         },
-        "payload_locked_documents_rels_books_id_idx": {
-          "name": "payload_locked_documents_rels_books_id_idx",
-          "columns": [
-            {
-              "expression": "books_id",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": false,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        },
         "payload_locked_documents_rels_laboratories_id_idx": {
           "name": "payload_locked_documents_rels_laboratories_id_idx",
           "columns": [
@@ -1136,19 +907,6 @@
           "tableTo": "experiments",
           "columnsFrom": [
             "experiments_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
-          "onDelete": "cascade",
-          "onUpdate": "no action"
-        },
-        "payload_locked_documents_rels_books_fk": {
-          "name": "payload_locked_documents_rels_books_fk",
-          "tableFrom": "payload_locked_documents_rels",
-          "tableTo": "books",
-          "columnsFrom": [
-            "books_id"
           ],
           "columnsTo": [
             "id"
@@ -1475,16 +1233,7 @@
       "isRLSEnabled": false
     }
   },
-  "enums": {
-    "public.enum_experiments_status": {
-      "name": "enum_experiments_status",
-      "schema": "public",
-      "values": [
-        "Draft",
-        "Published"
-      ]
-    }
-  },
+  "enums": {},
   "schemas": {},
   "sequences": {},
   "roles": {},
@@ -1495,6 +1244,6 @@
     "tables": {},
     "columns": {}
   },
-  "id": "d44771ba-a10b-4165-8220-6c0269b6bffa",
+  "id": "c70872dc-f3d4-4efc-b49f-bda66f500abd",
   "prevId": "00000000-0000-0000-0000-000000000000"
 }

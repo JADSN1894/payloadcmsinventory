@@ -70,7 +70,6 @@ export interface Config {
     users: User;
     media: Media;
     experiments: Experiment;
-    books: Book;
     laboratories: Laboratory;
     'payload-kv': PayloadKv;
     'payload-locked-documents': PayloadLockedDocument;
@@ -82,7 +81,6 @@ export interface Config {
     users: UsersSelect<false> | UsersSelect<true>;
     media: MediaSelect<false> | MediaSelect<true>;
     experiments: ExperimentsSelect<false> | ExperimentsSelect<true>;
-    books: BooksSelect<false> | BooksSelect<true>;
     laboratories: LaboratoriesSelect<false> | LaboratoriesSelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
@@ -171,31 +169,21 @@ export interface Media {
  */
 export interface Experiment {
   id: number;
-  title: string;
-  slug: string;
-  laboratoryNumber: number;
-  description: {
-    root: {
-      type: string;
-      children: {
-        type: any;
-        version: number;
-        [k: string]: unknown;
-      }[];
-      direction: ('ltr' | 'rtl') | null;
-      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
-      indent: number;
-      version: number;
-    };
-    [k: string]: unknown;
-  };
-  contentSummary: string;
-  coverImage?: (number | null) | Media;
-  status: 'Draft' | 'Published';
-  publishedAt?: string | null;
   laboratory: number | Laboratory;
+  qtde: number;
+  description: string;
+  coverImage?: (number | null) | Media;
   updatedAt: string;
   createdAt: string;
+  url?: string | null;
+  thumbnailURL?: string | null;
+  filename?: string | null;
+  mimeType?: string | null;
+  filesize?: number | null;
+  width?: number | null;
+  height?: number | null;
+  focalX?: number | null;
+  focalY?: number | null;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -205,18 +193,6 @@ export interface Laboratory {
   id: number;
   title: string;
   slug: string;
-  updatedAt: string;
-  createdAt: string;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "books".
- */
-export interface Book {
-  id: number;
-  qtde: number;
-  description: string;
-  coverImage?: (number | null) | Media;
   updatedAt: string;
   createdAt: string;
 }
@@ -255,10 +231,6 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'experiments';
         value: number | Experiment;
-      } | null)
-    | ({
-        relationTo: 'books';
-        value: number | Book;
       } | null)
     | ({
         relationTo: 'laboratories';
@@ -351,28 +323,21 @@ export interface MediaSelect<T extends boolean = true> {
  * via the `definition` "experiments_select".
  */
 export interface ExperimentsSelect<T extends boolean = true> {
-  title?: T;
-  slug?: T;
-  laboratoryNumber?: T;
-  description?: T;
-  contentSummary?: T;
-  coverImage?: T;
-  status?: T;
-  publishedAt?: T;
   laboratory?: T;
-  updatedAt?: T;
-  createdAt?: T;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "books_select".
- */
-export interface BooksSelect<T extends boolean = true> {
   qtde?: T;
   description?: T;
   coverImage?: T;
   updatedAt?: T;
   createdAt?: T;
+  url?: T;
+  thumbnailURL?: T;
+  filename?: T;
+  mimeType?: T;
+  filesize?: T;
+  width?: T;
+  height?: T;
+  focalX?: T;
+  focalY?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema

@@ -7,7 +7,7 @@ import { slugify } from 'payload/shared'
 export async function seedLaboratories(payload: Payload) {
     try {
 
-      for (let index = 0; index <= 5; index++) {
+      for (let index = 1; index <= 5; index++) {
           const title = faker.lorem.sentence({ min: 3, max: 5 })
           const response = await payload.create({
                   collection: 'laboratories',

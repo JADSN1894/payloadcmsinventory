@@ -18,10 +18,8 @@ import {
   serial,
   numeric,
   jsonb,
-  pgEnum,
 } from '@payloadcms/db-postgres/drizzle/pg-core'
 import { sql, relations } from '@payloadcms/db-postgres/drizzle'
-export const enum_experiments_status = pgEnum('enum_experiments_status', ['Draft', 'Published'])
 
 export const users_sessions = pgTable(
   'users_sessions',
@@ -108,42 +106,11 @@ export const experiments = pgTable(
   'experiments',
   {
     id: serial('id').primaryKey(),
-    title: varchar('title').notNull(),
-    slug: varchar('slug').notNull(),
-    laboratoryNumber: numeric('laboratory_number', { mode: 'number' }).notNull().default(1),
-    description: jsonb('description').notNull(),
-    contentSummary: varchar('content_summary').notNull(),
-    coverImage: integer('cover_image_id').references(() => media.id, {
-      onDelete: 'set null',
-    }),
-    status: enum_experiments_status('status').notNull().default('Draft'),
-    publishedAt: timestamp('published_at', { mode: 'string', withTimezone: true, precision: 3 }),
     laboratory: integer('laboratory_id')
       .notNull()
       .references(() => laboratories.id, {
         onDelete: 'set null',
       }),
-    updatedAt: timestamp('updated_at', { mode: 'string', withTimezone: true, precision: 3 })
-      .defaultNow()
-      .notNull(),
-    createdAt: timestamp('created_at', { mode: 'string', withTimezone: true, precision: 3 })
-      .defaultNow()
-      .notNull(),
-  },
-  (columns) => [
-    uniqueIndex('experiments_title_idx').on(columns.title),
-    uniqueIndex('experiments_slug_idx').on(columns.slug),
-    index('experiments_cover_image_idx').on(columns.coverImage),
-    index('experiments_laboratory_idx').on(columns.laboratory),
-    index('experiments_updated_at_idx').on(columns.updatedAt),
-    index('experiments_created_at_idx').on(columns.createdAt),
-  ],
-)
-
-export const books = pgTable(
-  'books',
-  {
-    id: serial('id').primaryKey(),
     qtde: numeric('qtde', { mode: 'number' }).notNull().default(1),
     description: varchar('description').notNull(),
     coverImage: integer('cover_image_id').references(() => media.id, {
@@ -157,9 +124,10 @@ export const books = pgTable(
       .notNull(),
   },
   (columns) => [
-    index('books_cover_image_idx').on(columns.coverImage),
-    index('books_updated_at_idx').on(columns.updatedAt),
-    index('books_created_at_idx').on(columns.createdAt),
+    index('experiments_laboratory_idx').on(columns.laboratory),
+    index('experiments_cover_image_idx').on(columns.coverImage),
+    index('experiments_updated_at_idx').on(columns.updatedAt),
+    index('experiments_created_at_idx').on(columns.createdAt),
   ],
 )
 
@@ -223,7 +191,6 @@ export const payload_locked_documents_rels = pgTable(
     usersID: integer('users_id'),
     mediaID: integer('media_id'),
     experimentsID: integer('experiments_id'),
-    booksID: integer('books_id'),
     laboratoriesID: integer('laboratories_id'),
   },
   (columns) => [
@@ -233,7 +200,6 @@ export const payload_locked_documents_rels = pgTable(
     index('payload_locked_documents_rels_users_id_idx').on(columns.usersID),
     index('payload_locked_documents_rels_media_id_idx').on(columns.mediaID),
     index('payload_locked_documents_rels_experiments_id_idx').on(columns.experimentsID),
-    index('payload_locked_documents_rels_books_id_idx').on(columns.booksID),
     index('payload_locked_documents_rels_laboratories_id_idx').on(columns.laboratoriesID),
     foreignKey({
       columns: [columns['parent']],
@@ -254,11 +220,6 @@ export const payload_locked_documents_rels = pgTable(
       columns: [columns['experimentsID']],
       foreignColumns: [experiments.id],
       name: 'payload_locked_documents_rels_experiments_fk',
-    }).onDelete('cascade'),
-    foreignKey({
-      columns: [columns['booksID']],
-      foreignColumns: [books.id],
-      name: 'payload_locked_documents_rels_books_fk',
     }).onDelete('cascade'),
     foreignKey({
       columns: [columns['laboratoriesID']],
@@ -348,20 +309,13 @@ export const relations_users = relations(users, ({ many }) => ({
 }))
 export const relations_media = relations(media, () => ({}))
 export const relations_experiments = relations(experiments, ({ one }) => ({
-  coverImage: one(media, {
-    fields: [experiments.coverImage],
-    references: [media.id],
-    relationName: 'coverImage',
-  }),
   laboratory: one(laboratories, {
     fields: [experiments.laboratory],
     references: [laboratories.id],
     relationName: 'laboratory',
   }),
-}))
-export const relations_books = relations(books, ({ one }) => ({
   coverImage: one(media, {
-    fields: [books.coverImage],
+    fields: [experiments.coverImage],
     references: [media.id],
     relationName: 'coverImage',
   }),
@@ -390,11 +344,6 @@ export const relations_payload_locked_documents_rels = relations(
       fields: [payload_locked_documents_rels.experimentsID],
       references: [experiments.id],
       relationName: 'experiments',
-    }),
-    booksID: one(books, {
-      fields: [payload_locked_documents_rels.booksID],
-      references: [books.id],
-      relationName: 'books',
     }),
     laboratoriesID: one(laboratories, {
       fields: [payload_locked_documents_rels.laboratoriesID],
@@ -434,12 +383,10 @@ export const relations_payload_preferences = relations(payload_preferences, ({ m
 export const relations_payload_migrations = relations(payload_migrations, () => ({}))
 
 type DatabaseSchema = {
-  enum_experiments_status: typeof enum_experiments_status
   users_sessions: typeof users_sessions
   users: typeof users
   media: typeof media
   experiments: typeof experiments
-  books: typeof books
   laboratories: typeof laboratories
   payload_kv: typeof payload_kv
   payload_locked_documents: typeof payload_locked_documents
@@ -451,7 +398,6 @@ type DatabaseSchema = {
   relations_users: typeof relations_users
   relations_media: typeof relations_media
   relations_experiments: typeof relations_experiments
-  relations_books: typeof relations_books
   relations_laboratories: typeof relations_laboratories
   relations_payload_kv: typeof relations_payload_kv
   relations_payload_locked_documents_rels: typeof relations_payload_locked_documents_rels
