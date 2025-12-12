@@ -8,10 +8,6 @@ export const Experiments: CollectionConfig = {
       defaultLimit: 50,
     },
   },
-  upload: {
-    mimeTypes: ['image/*'],
-    adminThumbnail: 'thumbnail',
-  },
   fields: [
     {
       name: 'laboratory',
@@ -40,6 +36,8 @@ export const Experiments: CollectionConfig = {
       filterOptions: {
         mimeType: { contains: 'image' },
       },
+      displayPreview: true,
+      
     },
   ],
 }

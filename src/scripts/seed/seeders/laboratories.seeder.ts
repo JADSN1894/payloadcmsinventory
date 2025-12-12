@@ -1,8 +1,12 @@
-import { Payload } from 'payload'
+import config from '@/payload.config'
+import { getPayload, Payload } from 'payload'
 import { faker } from '@faker-js/faker'
 import { slugify } from 'payload/shared'
 
-export async function seedLaboratories(payload: Payload) {
+export async function seedLaboratories() {
+
+    const payload = await getPayload({ config })
+  
   try {
     for (let index = 1; index <= 5; index++) {
       const title = faker.lorem.sentence({ min: 3, max: 5 })

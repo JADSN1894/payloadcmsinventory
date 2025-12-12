@@ -15,7 +15,7 @@ export async function createMediaFromImageUrl(payload: Payload, imageUrl: string
 
     const media = await payload.create({
       collection: 'media',
-      draft: true,
+      // draft: true,
       data: { alt: faker.lorem.words(3) },
       file: {
         data: buffer,

@@ -6,7 +6,7 @@ import { fileURLToPath } from 'url'
 import sharp from 'sharp'
 
 import { Users } from './collections/Users'
-import { Media } from './collections/Media'
+import { Media } from './collections/Media/config'
 import { env } from './lib/env'
 import { Experiments } from './collections/Experiments'
 import { Laboratories } from './collections/Laboratory'
@@ -44,6 +44,6 @@ export default buildConfig({
   }),
   sharp,
   plugins: [],
-  cors: ['supreme-space-acorn-9vjpqwjv96wf95rq.github.dev', 'localhost:3000'],
-  csrf: ['supreme-space-acorn-9vjpqwjv96wf95rq.github.dev', 'localhost:3000'],
+  cors: ['curly-train-v4qxgwq9xgw3jjg.github.dev', 'localhost:3000'],
+  csrf: ['curly-train-v4qxgwq9xgw3jjg.github.dev', 'localhost:3000'],
 })
