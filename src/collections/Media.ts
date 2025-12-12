@@ -4,7 +4,10 @@ export const Media: CollectionConfig = {
   slug: 'media',
   defaultSort: 'id',
   access: {
+    create: () => true,
     read: () => true,
+    update: () => true,
+    delete: () => true,
   },
   fields: [
     {
@@ -13,5 +16,9 @@ export const Media: CollectionConfig = {
       required: true,
     },
   ],
+  // upload: {
+  //   staticDir: '/media',
+  //   mimeTypes: ['image/*'],
+  // },
   upload: true,
 }

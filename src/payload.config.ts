@@ -29,6 +29,9 @@ export default buildConfig({
   editor: lexicalEditor({
     features: ({ defaultFeatures }) => [...defaultFeatures, FixedToolbarFeature()],
   }),
+  // upload: {
+  //   useTempFiles: true,
+  // },
   secret: process.env.PAYLOAD_SECRET || '',
   typescript: {
     outputFile: path.resolve(dirname, 'payload-types.ts'),
@@ -41,6 +44,6 @@ export default buildConfig({
   }),
   sharp,
   plugins: [],
-  cors: ['supreme-space-acorn-9vjpqwjv96wf95rq.github.dev','localhost:3000'],
-  csrf: ['supreme-space-acorn-9vjpqwjv96wf95rq.github.dev','localhost:3000'],
+  cors: ['supreme-space-acorn-9vjpqwjv96wf95rq.github.dev', 'localhost:3000'],
+  csrf: ['supreme-space-acorn-9vjpqwjv96wf95rq.github.dev', 'localhost:3000'],
 })

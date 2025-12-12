@@ -1,46 +1,40 @@
 {
-	"name": "PocPayloadCMSPostgress",
-	"dockerComposeFile": "docker-compose.yml",
-	"service": "app",
-	"workspaceFolder": "/workspaces/${localWorkspaceFolderBasename}",
-	"features": {
-		"ghcr.io/devcontainers/features/node:1.6.3": {
-			"nodeGypDependencies": false
-		},
-		"ghcr.io/devcontainers/features/docker-outside-of-docker:1.6.5": {
-			"moby": false
-		}
-	},
-	"portsAttributes": {
-		"8080": {
-			"label": "PgAdmin port",
-			"onAutoForward": "notify"
-		},
-		"5432": {
-			"label": "PostgreSQL port",
-			"onAutoForward": "notify"
-		}
-	},
-	"forwardPorts": [
-		8080,
-		5432
-	],
-	"customizations": {
-		"files.watcherExclude": {
-			"**/node_modules/**": true
-		},
-		"vscode": {
-			"extensions": [
-				"esbenp.prettier-vscode",
-				"fill-labs.dependi",
-				"dbaeumer.vscode-eslint"
-			],
-			"settings": {
-				"explorer.compactFolders": false,
-				"editor.fontWeight": "bold",
-				"terminal.integrated.fontWeight": "bold"
-			}
-		}
-	},
-	"remoteUser": "root"
+  "name": "PocPayloadCMSPostgress",
+  "dockerComposeFile": "docker-compose.yml",
+  "service": "app",
+  "workspaceFolder": "/workspaces/${localWorkspaceFolderBasename}",
+  "features": {
+    "ghcr.io/devcontainers/features/node:1.6.3": {
+      "nodeGypDependencies": false
+    },
+    "ghcr.io/devcontainers/features/docker-outside-of-docker:1.6.5": {
+      "moby": false
+    }
+  },
+  // "mounts": ["source=/media,target=/media,type=volume"],
+  "portsAttributes": {
+    "8080": {
+      "label": "PgAdmin port",
+      "onAutoForward": "notify"
+    },
+    "5432": {
+      "label": "PostgreSQL port",
+      "onAutoForward": "notify"
+    }
+  },
+  "forwardPorts": [8080, 5432],
+  "customizations": {
+    "files.watcherExclude": {
+      "**/node_modules/**": true
+    },
+    "vscode": {
+      "extensions": ["esbenp.prettier-vscode", "fill-labs.dependi", "dbaeumer.vscode-eslint"],
+      "settings": {
+        "explorer.compactFolders": false,
+        "editor.fontWeight": "bold",
+        "terminal.integrated.fontWeight": "bold"
+      }
+    }
+  },
+  "remoteUser": "root"
 }

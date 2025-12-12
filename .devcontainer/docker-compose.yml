@@ -5,7 +5,11 @@ services:
       dockerfile: Dockerfile
 
     volumes:
+      # Workspace (Windows or WSL mount)
       - ../..:/workspaces:cached
+
+      # Media directory (Docker volume, Linux ext4 inside Docker)
+      - media:/media
 
     # Overrides default command so things don't shut down after the process ends.
     command: sleep infinity
@@ -40,6 +44,7 @@ services:
 
 volumes:
   postgres-data:
+  media:
 
 networks: 
   postgres-compose-network:
