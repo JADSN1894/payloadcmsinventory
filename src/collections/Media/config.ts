@@ -13,6 +13,12 @@ export const Media: CollectionConfig = {
       type: 'text',
       required: true,
     },
+    {
+      name: 'blurDataUrl',
+      type: 'text',
+      required: true,
+      admin: { hidden: true },
+    },
   ],
   upload: true,
   hooks: {

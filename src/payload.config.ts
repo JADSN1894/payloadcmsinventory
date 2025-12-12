@@ -8,7 +8,7 @@ import sharp from 'sharp'
 import { Users } from './collections/Users'
 import { Media } from './collections/Media/config'
 import { env } from './lib/env'
-import { Experiments } from './collections/Experiments'
+import { Experiments } from './collections/Experiements/config'
 import { Laboratories } from './collections/Laboratory'
 
 const filename = fileURLToPath(import.meta.url)

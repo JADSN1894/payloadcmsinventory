@@ -1,3 +1,4 @@
+import { Media } from '@/payload-types'
 import { faker } from '@faker-js/faker'
 import { Payload } from 'payload'
 
@@ -15,7 +16,7 @@ export async function createMediaFromImageUrl(payload: Payload, imageUrl: string
 
     const media = await payload.create({
       collection: 'media',
-      // draft: true,
+      draft: true,
       data: { alt: faker.lorem.words(3) },
       file: {
         data: buffer,

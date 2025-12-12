@@ -44,6 +44,7 @@ import config from '@/payload.config'
 import { faker } from '@faker-js/faker'
 import { getPayload } from 'payload'
 import { createMediaFromImageUrl } from '../lib/create-media-from-image-url'
+import { Media } from '@/payload-types'
 
 export async function seedExperiments() {
   const rawData = Array.from({ length: 10 }, (item) => item)
@@ -54,6 +55,9 @@ export async function seedExperiments() {
     // console.log(`Creating ${JSON.stringify(data, null)}`)
     const imageUrl = faker.image.urlPicsumPhotos()
     const image = await createMediaFromImageUrl(payload, imageUrl)
+
+    if (!image) return;
+
     try {
       const createdData = await payload.create({
         collection: 'experiments',
@@ -61,7 +65,7 @@ export async function seedExperiments() {
           laboratory: faker.number.int({ min: 1, max: 5 }),
           qtde: faker.number.int({ min: 1, max: 100 }),
           description: faker.lorem.sentence({ min: 3, max: 10 }),
-          coverImage: image?.id,
+          coverImage: image,
         },
         // filePath: `./payload-media/${image.id}`,
         // draft: true,
