@@ -8,407 +8,445 @@
 
 import type {} from '@payloadcms/db-postgres'
 import {
-  pgTable,
-  index,
-  uniqueIndex,
-  foreignKey,
-  integer,
-  varchar,
-  timestamp,
-  serial,
-  numeric,
-  jsonb,
+    pgTable,
+    index,
+    uniqueIndex,
+    foreignKey,
+    integer,
+    varchar,
+    timestamp,
+    serial,
+    numeric,
+    jsonb,
+    pgEnum,
 } from '@payloadcms/db-postgres/drizzle/pg-core'
 import { sql, relations } from '@payloadcms/db-postgres/drizzle'
+export const enum_articles_status = pgEnum('enum_articles_status', ['Draft', 'Published'])
+export const enum_article_authors_role = pgEnum('enum_article_authors_role', [
+    'Staff Writer',
+    'Guest Writer',
+    'Flo Rida',
+    'Contributor',
+    'Editor',
+])
 
 export const users_sessions = pgTable(
-  'users_sessions',
-  {
-    _order: integer('_order').notNull(),
-    _parentID: integer('_parent_id').notNull(),
-    id: varchar('id').primaryKey(),
-    createdAt: timestamp('created_at', { mode: 'string', withTimezone: true, precision: 3 }),
-    expiresAt: timestamp('expires_at', {
-      mode: 'string',
-      withTimezone: true,
-      precision: 3,
-    }).notNull(),
-  },
-  (columns) => [
-    index('users_sessions_order_idx').on(columns._order),
-    index('users_sessions_parent_id_idx').on(columns._parentID),
-    foreignKey({
-      columns: [columns['_parentID']],
-      foreignColumns: [users.id],
-      name: 'users_sessions_parent_id_fk',
-    }).onDelete('cascade'),
-  ],
+    'users_sessions',
+    {
+        _order: integer('_order').notNull(),
+        _parentID: integer('_parent_id').notNull(),
+        id: varchar('id').primaryKey(),
+        createdAt: timestamp('created_at', { mode: 'string', withTimezone: true, precision: 3 }),
+        expiresAt: timestamp('expires_at', {
+            mode: 'string',
+            withTimezone: true,
+            precision: 3,
+        }).notNull(),
+    },
+    (columns) => [
+        index('users_sessions_order_idx').on(columns._order),
+        index('users_sessions_parent_id_idx').on(columns._parentID),
+        foreignKey({
+            columns: [columns['_parentID']],
+            foreignColumns: [users.id],
+            name: 'users_sessions_parent_id_fk',
+        }).onDelete('cascade'),
+    ],
 )
 
 export const users = pgTable(
-  'users',
-  {
-    id: serial('id').primaryKey(),
-    updatedAt: timestamp('updated_at', { mode: 'string', withTimezone: true, precision: 3 })
-      .defaultNow()
-      .notNull(),
-    createdAt: timestamp('created_at', { mode: 'string', withTimezone: true, precision: 3 })
-      .defaultNow()
-      .notNull(),
-    email: varchar('email').notNull(),
-    resetPasswordToken: varchar('reset_password_token'),
-    resetPasswordExpiration: timestamp('reset_password_expiration', {
-      mode: 'string',
-      withTimezone: true,
-      precision: 3,
-    }),
-    salt: varchar('salt'),
-    hash: varchar('hash'),
-    loginAttempts: numeric('login_attempts', { mode: 'number' }).default(0),
-    lockUntil: timestamp('lock_until', { mode: 'string', withTimezone: true, precision: 3 }),
-  },
-  (columns) => [
-    index('users_updated_at_idx').on(columns.updatedAt),
-    index('users_created_at_idx').on(columns.createdAt),
-    uniqueIndex('users_email_idx').on(columns.email),
-  ],
+    'users',
+    {
+        id: serial('id').primaryKey(),
+        updatedAt: timestamp('updated_at', { mode: 'string', withTimezone: true, precision: 3 })
+            .defaultNow()
+            .notNull(),
+        createdAt: timestamp('created_at', { mode: 'string', withTimezone: true, precision: 3 })
+            .defaultNow()
+            .notNull(),
+        email: varchar('email').notNull(),
+        resetPasswordToken: varchar('reset_password_token'),
+        resetPasswordExpiration: timestamp('reset_password_expiration', {
+            mode: 'string',
+            withTimezone: true,
+            precision: 3,
+        }),
+        salt: varchar('salt'),
+        hash: varchar('hash'),
+        loginAttempts: numeric('login_attempts', { mode: 'number' }).default(0),
+        lockUntil: timestamp('lock_until', { mode: 'string', withTimezone: true, precision: 3 }),
+    },
+    (columns) => [
+        index('users_updated_at_idx').on(columns.updatedAt),
+        index('users_created_at_idx').on(columns.createdAt),
+        uniqueIndex('users_email_idx').on(columns.email),
+    ],
 )
 
 export const media = pgTable(
-  'media',
-  {
-    id: serial('id').primaryKey(),
-    alt: varchar('alt').notNull(),
-    updatedAt: timestamp('updated_at', { mode: 'string', withTimezone: true, precision: 3 })
-      .defaultNow()
-      .notNull(),
-    createdAt: timestamp('created_at', { mode: 'string', withTimezone: true, precision: 3 })
-      .defaultNow()
-      .notNull(),
-    url: varchar('url'),
-    thumbnailURL: varchar('thumbnail_u_r_l'),
-    filename: varchar('filename'),
-    mimeType: varchar('mime_type'),
-    filesize: numeric('filesize', { mode: 'number' }),
-    width: numeric('width', { mode: 'number' }),
-    height: numeric('height', { mode: 'number' }),
-    focalX: numeric('focal_x', { mode: 'number' }),
-    focalY: numeric('focal_y', { mode: 'number' }),
-  },
-  (columns) => [
-    index('media_updated_at_idx').on(columns.updatedAt),
-    index('media_created_at_idx').on(columns.createdAt),
-    uniqueIndex('media_filename_idx').on(columns.filename),
-  ],
+    'media',
+    {
+        id: serial('id').primaryKey(),
+        alt: varchar('alt').notNull(),
+        blurDataUrl: varchar('blur_data_url').notNull(),
+        updatedAt: timestamp('updated_at', { mode: 'string', withTimezone: true, precision: 3 })
+            .defaultNow()
+            .notNull(),
+        createdAt: timestamp('created_at', { mode: 'string', withTimezone: true, precision: 3 })
+            .defaultNow()
+            .notNull(),
+        url: varchar('url'),
+        thumbnailURL: varchar('thumbnail_u_r_l'),
+        filename: varchar('filename'),
+        mimeType: varchar('mime_type'),
+        filesize: numeric('filesize', { mode: 'number' }),
+        width: numeric('width', { mode: 'number' }),
+        height: numeric('height', { mode: 'number' }),
+        focalX: numeric('focal_x', { mode: 'number' }),
+        focalY: numeric('focal_y', { mode: 'number' }),
+    },
+    (columns) => [
+        index('media_updated_at_idx').on(columns.updatedAt),
+        index('media_created_at_idx').on(columns.createdAt),
+        uniqueIndex('media_filename_idx').on(columns.filename),
+    ],
 )
 
-export const experiments = pgTable(
-  'experiments',
-  {
-    id: serial('id').primaryKey(),
-    laboratory: integer('laboratory_id')
-      .notNull()
-      .references(() => laboratories.id, {
-        onDelete: 'set null',
-      }),
-    qtde: numeric('qtde', { mode: 'number' }).notNull().default(1),
-    description: varchar('description').notNull(),
-    coverImage: integer('cover_image_id').references(() => media.id, {
-      onDelete: 'set null',
-    }),
-    updatedAt: timestamp('updated_at', { mode: 'string', withTimezone: true, precision: 3 })
-      .defaultNow()
-      .notNull(),
-    createdAt: timestamp('created_at', { mode: 'string', withTimezone: true, precision: 3 })
-      .defaultNow()
-      .notNull(),
-  },
-  (columns) => [
-    index('experiments_laboratory_idx').on(columns.laboratory),
-    index('experiments_cover_image_idx').on(columns.coverImage),
-    index('experiments_updated_at_idx').on(columns.updatedAt),
-    index('experiments_created_at_idx').on(columns.createdAt),
-  ],
+export const articles = pgTable(
+    'articles',
+    {
+        id: serial('id').primaryKey(),
+        title: varchar('title').notNull(),
+        slug: varchar('slug').notNull(),
+        content: jsonb('content').notNull(),
+        contentSummary: varchar('content_summary').notNull(),
+        readTimeInMins: numeric('read_time_in_mins', { mode: 'number' }).default(0),
+        coverImage: integer('cover_image_id')
+            .notNull()
+            .references(() => media.id, {
+                onDelete: 'set null',
+            }),
+        author: integer('author_id')
+            .notNull()
+            .references(() => article_authors.id, {
+                onDelete: 'set null',
+            }),
+        status: enum_articles_status('status').notNull().default('Draft'),
+        publishedAt: timestamp('published_at', {
+            mode: 'string',
+            withTimezone: true,
+            precision: 3,
+        }),
+        updatedAt: timestamp('updated_at', { mode: 'string', withTimezone: true, precision: 3 })
+            .defaultNow()
+            .notNull(),
+        createdAt: timestamp('created_at', { mode: 'string', withTimezone: true, precision: 3 })
+            .defaultNow()
+            .notNull(),
+    },
+    (columns) => [
+        uniqueIndex('articles_title_idx').on(columns.title),
+        uniqueIndex('articles_slug_idx').on(columns.slug),
+        index('articles_cover_image_idx').on(columns.coverImage),
+        index('articles_author_idx').on(columns.author),
+        index('articles_updated_at_idx').on(columns.updatedAt),
+        index('articles_created_at_idx').on(columns.createdAt),
+    ],
 )
 
-export const laboratories = pgTable(
-  'laboratories',
-  {
-    id: serial('id').primaryKey(),
-    title: varchar('title').notNull(),
-    slug: varchar('slug').notNull(),
-    updatedAt: timestamp('updated_at', { mode: 'string', withTimezone: true, precision: 3 })
-      .defaultNow()
-      .notNull(),
-    createdAt: timestamp('created_at', { mode: 'string', withTimezone: true, precision: 3 })
-      .defaultNow()
-      .notNull(),
-  },
-  (columns) => [
-    uniqueIndex('laboratories_title_idx').on(columns.title),
-    uniqueIndex('laboratories_slug_idx').on(columns.slug),
-    index('laboratories_updated_at_idx').on(columns.updatedAt),
-    index('laboratories_created_at_idx').on(columns.createdAt),
-  ],
+export const article_authors = pgTable(
+    'article_authors',
+    {
+        id: serial('id').primaryKey(),
+        name: varchar('name').notNull(),
+        avatar: integer('avatar_id')
+            .notNull()
+            .references(() => media.id, {
+                onDelete: 'set null',
+            }),
+        role: enum_article_authors_role('role').notNull().default('Staff Writer'),
+        updatedAt: timestamp('updated_at', { mode: 'string', withTimezone: true, precision: 3 })
+            .defaultNow()
+            .notNull(),
+        createdAt: timestamp('created_at', { mode: 'string', withTimezone: true, precision: 3 })
+            .defaultNow()
+            .notNull(),
+    },
+    (columns) => [
+        uniqueIndex('article_authors_name_idx').on(columns.name),
+        index('article_authors_avatar_idx').on(columns.avatar),
+        index('article_authors_updated_at_idx').on(columns.updatedAt),
+        index('article_authors_created_at_idx').on(columns.createdAt),
+    ],
 )
 
 export const payload_kv = pgTable(
-  'payload_kv',
-  {
-    id: serial('id').primaryKey(),
-    key: varchar('key').notNull(),
-    data: jsonb('data').notNull(),
-  },
-  (columns) => [uniqueIndex('payload_kv_key_idx').on(columns.key)],
+    'payload_kv',
+    {
+        id: serial('id').primaryKey(),
+        key: varchar('key').notNull(),
+        data: jsonb('data').notNull(),
+    },
+    (columns) => [uniqueIndex('payload_kv_key_idx').on(columns.key)],
 )
 
 export const payload_locked_documents = pgTable(
-  'payload_locked_documents',
-  {
-    id: serial('id').primaryKey(),
-    globalSlug: varchar('global_slug'),
-    updatedAt: timestamp('updated_at', { mode: 'string', withTimezone: true, precision: 3 })
-      .defaultNow()
-      .notNull(),
-    createdAt: timestamp('created_at', { mode: 'string', withTimezone: true, precision: 3 })
-      .defaultNow()
-      .notNull(),
-  },
-  (columns) => [
-    index('payload_locked_documents_global_slug_idx').on(columns.globalSlug),
-    index('payload_locked_documents_updated_at_idx').on(columns.updatedAt),
-    index('payload_locked_documents_created_at_idx').on(columns.createdAt),
-  ],
+    'payload_locked_documents',
+    {
+        id: serial('id').primaryKey(),
+        globalSlug: varchar('global_slug'),
+        updatedAt: timestamp('updated_at', { mode: 'string', withTimezone: true, precision: 3 })
+            .defaultNow()
+            .notNull(),
+        createdAt: timestamp('created_at', { mode: 'string', withTimezone: true, precision: 3 })
+            .defaultNow()
+            .notNull(),
+    },
+    (columns) => [
+        index('payload_locked_documents_global_slug_idx').on(columns.globalSlug),
+        index('payload_locked_documents_updated_at_idx').on(columns.updatedAt),
+        index('payload_locked_documents_created_at_idx').on(columns.createdAt),
+    ],
 )
 
 export const payload_locked_documents_rels = pgTable(
-  'payload_locked_documents_rels',
-  {
-    id: serial('id').primaryKey(),
-    order: integer('order'),
-    parent: integer('parent_id').notNull(),
-    path: varchar('path').notNull(),
-    usersID: integer('users_id'),
-    mediaID: integer('media_id'),
-    experimentsID: integer('experiments_id'),
-    laboratoriesID: integer('laboratories_id'),
-  },
-  (columns) => [
-    index('payload_locked_documents_rels_order_idx').on(columns.order),
-    index('payload_locked_documents_rels_parent_idx').on(columns.parent),
-    index('payload_locked_documents_rels_path_idx').on(columns.path),
-    index('payload_locked_documents_rels_users_id_idx').on(columns.usersID),
-    index('payload_locked_documents_rels_media_id_idx').on(columns.mediaID),
-    index('payload_locked_documents_rels_experiments_id_idx').on(columns.experimentsID),
-    index('payload_locked_documents_rels_laboratories_id_idx').on(columns.laboratoriesID),
-    foreignKey({
-      columns: [columns['parent']],
-      foreignColumns: [payload_locked_documents.id],
-      name: 'payload_locked_documents_rels_parent_fk',
-    }).onDelete('cascade'),
-    foreignKey({
-      columns: [columns['usersID']],
-      foreignColumns: [users.id],
-      name: 'payload_locked_documents_rels_users_fk',
-    }).onDelete('cascade'),
-    foreignKey({
-      columns: [columns['mediaID']],
-      foreignColumns: [media.id],
-      name: 'payload_locked_documents_rels_media_fk',
-    }).onDelete('cascade'),
-    foreignKey({
-      columns: [columns['experimentsID']],
-      foreignColumns: [experiments.id],
-      name: 'payload_locked_documents_rels_experiments_fk',
-    }).onDelete('cascade'),
-    foreignKey({
-      columns: [columns['laboratoriesID']],
-      foreignColumns: [laboratories.id],
-      name: 'payload_locked_documents_rels_laboratories_fk',
-    }).onDelete('cascade'),
-  ],
+    'payload_locked_documents_rels',
+    {
+        id: serial('id').primaryKey(),
+        order: integer('order'),
+        parent: integer('parent_id').notNull(),
+        path: varchar('path').notNull(),
+        usersID: integer('users_id'),
+        mediaID: integer('media_id'),
+        articlesID: integer('articles_id'),
+        'article-authorsID': integer('article_authors_id'),
+    },
+    (columns) => [
+        index('payload_locked_documents_rels_order_idx').on(columns.order),
+        index('payload_locked_documents_rels_parent_idx').on(columns.parent),
+        index('payload_locked_documents_rels_path_idx').on(columns.path),
+        index('payload_locked_documents_rels_users_id_idx').on(columns.usersID),
+        index('payload_locked_documents_rels_media_id_idx').on(columns.mediaID),
+        index('payload_locked_documents_rels_articles_id_idx').on(columns.articlesID),
+        index('payload_locked_documents_rels_article_authors_id_idx').on(
+            columns['article-authorsID'],
+        ),
+        foreignKey({
+            columns: [columns['parent']],
+            foreignColumns: [payload_locked_documents.id],
+            name: 'payload_locked_documents_rels_parent_fk',
+        }).onDelete('cascade'),
+        foreignKey({
+            columns: [columns['usersID']],
+            foreignColumns: [users.id],
+            name: 'payload_locked_documents_rels_users_fk',
+        }).onDelete('cascade'),
+        foreignKey({
+            columns: [columns['mediaID']],
+            foreignColumns: [media.id],
+            name: 'payload_locked_documents_rels_media_fk',
+        }).onDelete('cascade'),
+        foreignKey({
+            columns: [columns['articlesID']],
+            foreignColumns: [articles.id],
+            name: 'payload_locked_documents_rels_articles_fk',
+        }).onDelete('cascade'),
+        foreignKey({
+            columns: [columns['article-authorsID']],
+            foreignColumns: [article_authors.id],
+            name: 'payload_locked_documents_rels_article_authors_fk',
+        }).onDelete('cascade'),
+    ],
 )
 
 export const payload_preferences = pgTable(
-  'payload_preferences',
-  {
-    id: serial('id').primaryKey(),
-    key: varchar('key'),
-    value: jsonb('value'),
-    updatedAt: timestamp('updated_at', { mode: 'string', withTimezone: true, precision: 3 })
-      .defaultNow()
-      .notNull(),
-    createdAt: timestamp('created_at', { mode: 'string', withTimezone: true, precision: 3 })
-      .defaultNow()
-      .notNull(),
-  },
-  (columns) => [
-    index('payload_preferences_key_idx').on(columns.key),
-    index('payload_preferences_updated_at_idx').on(columns.updatedAt),
-    index('payload_preferences_created_at_idx').on(columns.createdAt),
-  ],
+    'payload_preferences',
+    {
+        id: serial('id').primaryKey(),
+        key: varchar('key'),
+        value: jsonb('value'),
+        updatedAt: timestamp('updated_at', { mode: 'string', withTimezone: true, precision: 3 })
+            .defaultNow()
+            .notNull(),
+        createdAt: timestamp('created_at', { mode: 'string', withTimezone: true, precision: 3 })
+            .defaultNow()
+            .notNull(),
+    },
+    (columns) => [
+        index('payload_preferences_key_idx').on(columns.key),
+        index('payload_preferences_updated_at_idx').on(columns.updatedAt),
+        index('payload_preferences_created_at_idx').on(columns.createdAt),
+    ],
 )
 
 export const payload_preferences_rels = pgTable(
-  'payload_preferences_rels',
-  {
-    id: serial('id').primaryKey(),
-    order: integer('order'),
-    parent: integer('parent_id').notNull(),
-    path: varchar('path').notNull(),
-    usersID: integer('users_id'),
-  },
-  (columns) => [
-    index('payload_preferences_rels_order_idx').on(columns.order),
-    index('payload_preferences_rels_parent_idx').on(columns.parent),
-    index('payload_preferences_rels_path_idx').on(columns.path),
-    index('payload_preferences_rels_users_id_idx').on(columns.usersID),
-    foreignKey({
-      columns: [columns['parent']],
-      foreignColumns: [payload_preferences.id],
-      name: 'payload_preferences_rels_parent_fk',
-    }).onDelete('cascade'),
-    foreignKey({
-      columns: [columns['usersID']],
-      foreignColumns: [users.id],
-      name: 'payload_preferences_rels_users_fk',
-    }).onDelete('cascade'),
-  ],
+    'payload_preferences_rels',
+    {
+        id: serial('id').primaryKey(),
+        order: integer('order'),
+        parent: integer('parent_id').notNull(),
+        path: varchar('path').notNull(),
+        usersID: integer('users_id'),
+    },
+    (columns) => [
+        index('payload_preferences_rels_order_idx').on(columns.order),
+        index('payload_preferences_rels_parent_idx').on(columns.parent),
+        index('payload_preferences_rels_path_idx').on(columns.path),
+        index('payload_preferences_rels_users_id_idx').on(columns.usersID),
+        foreignKey({
+            columns: [columns['parent']],
+            foreignColumns: [payload_preferences.id],
+            name: 'payload_preferences_rels_parent_fk',
+        }).onDelete('cascade'),
+        foreignKey({
+            columns: [columns['usersID']],
+            foreignColumns: [users.id],
+            name: 'payload_preferences_rels_users_fk',
+        }).onDelete('cascade'),
+    ],
 )
 
 export const payload_migrations = pgTable(
-  'payload_migrations',
-  {
-    id: serial('id').primaryKey(),
-    name: varchar('name'),
-    batch: numeric('batch', { mode: 'number' }),
-    updatedAt: timestamp('updated_at', { mode: 'string', withTimezone: true, precision: 3 })
-      .defaultNow()
-      .notNull(),
-    createdAt: timestamp('created_at', { mode: 'string', withTimezone: true, precision: 3 })
-      .defaultNow()
-      .notNull(),
-  },
-  (columns) => [
-    index('payload_migrations_updated_at_idx').on(columns.updatedAt),
-    index('payload_migrations_created_at_idx').on(columns.createdAt),
-  ],
+    'payload_migrations',
+    {
+        id: serial('id').primaryKey(),
+        name: varchar('name'),
+        batch: numeric('batch', { mode: 'number' }),
+        updatedAt: timestamp('updated_at', { mode: 'string', withTimezone: true, precision: 3 })
+            .defaultNow()
+            .notNull(),
+        createdAt: timestamp('created_at', { mode: 'string', withTimezone: true, precision: 3 })
+            .defaultNow()
+            .notNull(),
+    },
+    (columns) => [
+        index('payload_migrations_updated_at_idx').on(columns.updatedAt),
+        index('payload_migrations_created_at_idx').on(columns.createdAt),
+    ],
 )
 
 export const relations_users_sessions = relations(users_sessions, ({ one }) => ({
-  _parentID: one(users, {
-    fields: [users_sessions._parentID],
-    references: [users.id],
-    relationName: 'sessions',
-  }),
+    _parentID: one(users, {
+        fields: [users_sessions._parentID],
+        references: [users.id],
+        relationName: 'sessions',
+    }),
 }))
 export const relations_users = relations(users, ({ many }) => ({
-  sessions: many(users_sessions, {
-    relationName: 'sessions',
-  }),
+    sessions: many(users_sessions, {
+        relationName: 'sessions',
+    }),
 }))
 export const relations_media = relations(media, () => ({}))
-export const relations_experiments = relations(experiments, ({ one }) => ({
-  laboratory: one(laboratories, {
-    fields: [experiments.laboratory],
-    references: [laboratories.id],
-    relationName: 'laboratory',
-  }),
-  coverImage: one(media, {
-    fields: [experiments.coverImage],
-    references: [media.id],
-    relationName: 'coverImage',
-  }),
+export const relations_articles = relations(articles, ({ one }) => ({
+    coverImage: one(media, {
+        fields: [articles.coverImage],
+        references: [media.id],
+        relationName: 'coverImage',
+    }),
+    author: one(article_authors, {
+        fields: [articles.author],
+        references: [article_authors.id],
+        relationName: 'author',
+    }),
 }))
-export const relations_laboratories = relations(laboratories, () => ({}))
+export const relations_article_authors = relations(article_authors, ({ one }) => ({
+    avatar: one(media, {
+        fields: [article_authors.avatar],
+        references: [media.id],
+        relationName: 'avatar',
+    }),
+}))
 export const relations_payload_kv = relations(payload_kv, () => ({}))
 export const relations_payload_locked_documents_rels = relations(
-  payload_locked_documents_rels,
-  ({ one }) => ({
-    parent: one(payload_locked_documents, {
-      fields: [payload_locked_documents_rels.parent],
-      references: [payload_locked_documents.id],
-      relationName: '_rels',
+    payload_locked_documents_rels,
+    ({ one }) => ({
+        parent: one(payload_locked_documents, {
+            fields: [payload_locked_documents_rels.parent],
+            references: [payload_locked_documents.id],
+            relationName: '_rels',
+        }),
+        usersID: one(users, {
+            fields: [payload_locked_documents_rels.usersID],
+            references: [users.id],
+            relationName: 'users',
+        }),
+        mediaID: one(media, {
+            fields: [payload_locked_documents_rels.mediaID],
+            references: [media.id],
+            relationName: 'media',
+        }),
+        articlesID: one(articles, {
+            fields: [payload_locked_documents_rels.articlesID],
+            references: [articles.id],
+            relationName: 'articles',
+        }),
+        'article-authorsID': one(article_authors, {
+            fields: [payload_locked_documents_rels['article-authorsID']],
+            references: [article_authors.id],
+            relationName: 'article-authors',
+        }),
     }),
-    usersID: one(users, {
-      fields: [payload_locked_documents_rels.usersID],
-      references: [users.id],
-      relationName: 'users',
-    }),
-    mediaID: one(media, {
-      fields: [payload_locked_documents_rels.mediaID],
-      references: [media.id],
-      relationName: 'media',
-    }),
-    experimentsID: one(experiments, {
-      fields: [payload_locked_documents_rels.experimentsID],
-      references: [experiments.id],
-      relationName: 'experiments',
-    }),
-    laboratoriesID: one(laboratories, {
-      fields: [payload_locked_documents_rels.laboratoriesID],
-      references: [laboratories.id],
-      relationName: 'laboratories',
-    }),
-  }),
 )
 export const relations_payload_locked_documents = relations(
-  payload_locked_documents,
-  ({ many }) => ({
-    _rels: many(payload_locked_documents_rels, {
-      relationName: '_rels',
+    payload_locked_documents,
+    ({ many }) => ({
+        _rels: many(payload_locked_documents_rels, {
+            relationName: '_rels',
+        }),
     }),
-  }),
 )
 export const relations_payload_preferences_rels = relations(
-  payload_preferences_rels,
-  ({ one }) => ({
-    parent: one(payload_preferences, {
-      fields: [payload_preferences_rels.parent],
-      references: [payload_preferences.id],
-      relationName: '_rels',
+    payload_preferences_rels,
+    ({ one }) => ({
+        parent: one(payload_preferences, {
+            fields: [payload_preferences_rels.parent],
+            references: [payload_preferences.id],
+            relationName: '_rels',
+        }),
+        usersID: one(users, {
+            fields: [payload_preferences_rels.usersID],
+            references: [users.id],
+            relationName: 'users',
+        }),
     }),
-    usersID: one(users, {
-      fields: [payload_preferences_rels.usersID],
-      references: [users.id],
-      relationName: 'users',
-    }),
-  }),
 )
 export const relations_payload_preferences = relations(payload_preferences, ({ many }) => ({
-  _rels: many(payload_preferences_rels, {
-    relationName: '_rels',
-  }),
+    _rels: many(payload_preferences_rels, {
+        relationName: '_rels',
+    }),
 }))
 export const relations_payload_migrations = relations(payload_migrations, () => ({}))
 
 type DatabaseSchema = {
-  users_sessions: typeof users_sessions
-  users: typeof users
-  media: typeof media
-  experiments: typeof experiments
-  laboratories: typeof laboratories
-  payload_kv: typeof payload_kv
-  payload_locked_documents: typeof payload_locked_documents
-  payload_locked_documents_rels: typeof payload_locked_documents_rels
-  payload_preferences: typeof payload_preferences
-  payload_preferences_rels: typeof payload_preferences_rels
-  payload_migrations: typeof payload_migrations
-  relations_users_sessions: typeof relations_users_sessions
-  relations_users: typeof relations_users
-  relations_media: typeof relations_media
-  relations_experiments: typeof relations_experiments
-  relations_laboratories: typeof relations_laboratories
-  relations_payload_kv: typeof relations_payload_kv
-  relations_payload_locked_documents_rels: typeof relations_payload_locked_documents_rels
-  relations_payload_locked_documents: typeof relations_payload_locked_documents
-  relations_payload_preferences_rels: typeof relations_payload_preferences_rels
-  relations_payload_preferences: typeof relations_payload_preferences
-  relations_payload_migrations: typeof relations_payload_migrations
+    enum_articles_status: typeof enum_articles_status
+    enum_article_authors_role: typeof enum_article_authors_role
+    users_sessions: typeof users_sessions
+    users: typeof users
+    media: typeof media
+    articles: typeof articles
+    article_authors: typeof article_authors
+    payload_kv: typeof payload_kv
+    payload_locked_documents: typeof payload_locked_documents
+    payload_locked_documents_rels: typeof payload_locked_documents_rels
+    payload_preferences: typeof payload_preferences
+    payload_preferences_rels: typeof payload_preferences_rels
+    payload_migrations: typeof payload_migrations
+    relations_users_sessions: typeof relations_users_sessions
+    relations_users: typeof relations_users
+    relations_media: typeof relations_media
+    relations_articles: typeof relations_articles
+    relations_article_authors: typeof relations_article_authors
+    relations_payload_kv: typeof relations_payload_kv
+    relations_payload_locked_documents_rels: typeof relations_payload_locked_documents_rels
+    relations_payload_locked_documents: typeof relations_payload_locked_documents
+    relations_payload_preferences_rels: typeof relations_payload_preferences_rels
+    relations_payload_preferences: typeof relations_payload_preferences
+    relations_payload_migrations: typeof relations_payload_migrations
 }
 
 declare module '@payloadcms/db-postgres' {
-  export interface GeneratedDatabaseSchema {
-    schema: DatabaseSchema
-  }
+    export interface GeneratedDatabaseSchema {
+        schema: DatabaseSchema
+    }
 }

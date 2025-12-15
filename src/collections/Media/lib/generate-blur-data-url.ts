@@ -1,4 +1,4 @@
-// import type { Buffer } from 'node:buffer'
+import type { Buffer } from 'node:buffer'
 import { getPlaiceholder } from 'plaiceholder'
 
 export function isEligibleForBlurDataURL(mime?: string | null) {
@@ -8,7 +8,7 @@ export function isEligibleForBlurDataURL(mime?: string | null) {
 }
 
 export async function generateBlurDataURL(
-    buffer?: Buffer,
+    buffer?: Buffer<ArrayBufferLike>,
 ): Promise<string | null> {
     if (!buffer) {
         console.warn('Failed to generate blur data URL: missing buffer')

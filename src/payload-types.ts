@@ -69,8 +69,8 @@ export interface Config {
   collections: {
     users: User;
     media: Media;
-    experiments: Experiment;
-    laboratories: Laboratory;
+    articles: Article;
+    'article-authors': ArticleAuthor;
     'payload-kv': PayloadKv;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
@@ -80,8 +80,8 @@ export interface Config {
   collectionsSelect: {
     users: UsersSelect<false> | UsersSelect<true>;
     media: MediaSelect<false> | MediaSelect<true>;
-    experiments: ExperimentsSelect<false> | ExperimentsSelect<true>;
-    laboratories: LaboratoriesSelect<false> | LaboratoriesSelect<true>;
+    articles: ArticlesSelect<false> | ArticlesSelect<true>;
+    'article-authors': ArticleAuthorsSelect<false> | ArticleAuthorsSelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
@@ -166,25 +166,45 @@ export interface Media {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "experiments".
+ * via the `definition` "articles".
  */
-export interface Experiment {
+export interface Article {
   id: number;
-  laboratory: number | Laboratory;
-  qtde: number;
-  description: string;
-  coverImage?: (number | null) | Media;
+  title: string;
+  slug: string;
+  content: {
+    root: {
+      type: string;
+      children: {
+        type: any;
+        version: number;
+        [k: string]: unknown;
+      }[];
+      direction: ('ltr' | 'rtl') | null;
+      format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+      indent: number;
+      version: number;
+    };
+    [k: string]: unknown;
+  };
+  contentSummary: string;
+  readTimeInMins?: number | null;
+  coverImage: number | Media;
+  author: number | ArticleAuthor;
+  status: 'Draft' | 'Published';
+  publishedAt?: string | null;
   updatedAt: string;
   createdAt: string;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "laboratories".
+ * via the `definition` "article-authors".
  */
-export interface Laboratory {
+export interface ArticleAuthor {
   id: number;
-  title: string;
-  slug: string;
+  name: string;
+  avatar: number | Media;
+  role: 'Staff Writer' | 'Guest Writer' | 'Flo Rida' | 'Contributor' | 'Editor';
   updatedAt: string;
   createdAt: string;
 }
@@ -221,12 +241,12 @@ export interface PayloadLockedDocument {
         value: number | Media;
       } | null)
     | ({
-        relationTo: 'experiments';
-        value: number | Experiment;
+        relationTo: 'articles';
+        value: number | Article;
       } | null)
     | ({
-        relationTo: 'laboratories';
-        value: number | Laboratory;
+        relationTo: 'article-authors';
+        value: number | ArticleAuthor;
       } | null);
   globalSlug?: string | null;
   user: {
@@ -313,23 +333,29 @@ export interface MediaSelect<T extends boolean = true> {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "experiments_select".
+ * via the `definition` "articles_select".
  */
-export interface ExperimentsSelect<T extends boolean = true> {
-  laboratory?: T;
-  qtde?: T;
-  description?: T;
+export interface ArticlesSelect<T extends boolean = true> {
+  title?: T;
+  slug?: T;
+  content?: T;
+  contentSummary?: T;
+  readTimeInMins?: T;
   coverImage?: T;
+  author?: T;
+  status?: T;
+  publishedAt?: T;
   updatedAt?: T;
   createdAt?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "laboratories_select".
+ * via the `definition` "article-authors_select".
  */
-export interface LaboratoriesSelect<T extends boolean = true> {
-  title?: T;
-  slug?: T;
+export interface ArticleAuthorsSelect<T extends boolean = true> {
+  name?: T;
+  avatar?: T;
+  role?: T;
   updatedAt?: T;
   createdAt?: T;
 }
