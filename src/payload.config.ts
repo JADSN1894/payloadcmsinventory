@@ -43,4 +43,6 @@ export default buildConfig({
     plugins: [
         // storage-adapter-placeholder
     ],
+    cors: ['0.0.0.0:3000'],
+    csrf: ['0.0.0.0:3000'],
 })

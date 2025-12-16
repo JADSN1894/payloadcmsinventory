@@ -82,7 +82,7 @@ export const Articles: CollectionConfig = {
             },
         },
     ],
-    hooks: {
-        afterChange: [() => revalidateTag(CACHE_TAG_ARTICLES, "max")],
-    },
+    // hooks: {
+    //     afterChange: [() => revalidateTag(CACHE_TAG_ARTICLES, "max")],
+    // },
 }

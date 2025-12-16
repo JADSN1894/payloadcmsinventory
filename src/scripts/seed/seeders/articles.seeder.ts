@@ -9,8 +9,6 @@ import { slugify } from 'payload/shared'
 const ARTICLES_COUNT = 5
 
 export async function seedArticles(payload: Payload) {
-    let successCount = 0
-
     for (let i = 0; i < ARTICLES_COUNT; i++) {
         try {
             const imageUrl = faker.image.urlPicsumPhotos()
@@ -47,7 +45,6 @@ export async function seedArticles(payload: Payload) {
                 draft: true,
             })
 
-            successCount++
         } catch (error) {
             console.error('Failed to seed article', error)
         }

@@ -2,7 +2,7 @@ import { getPayloadClient } from '@/lib/payload/client'
 import { CACHE_TAG_ARTICLES, STATUS_OPTIONS } from './constants'
 import { unstable_cache } from 'next/cache'
 
-async function _getPublishedArticles() {
+export async function getPublishedArticles() {
     const payload = await getPayloadClient()
     try {
         const { docs: articles } = await payload.find({
@@ -26,11 +26,11 @@ async function _getPublishedArticles() {
     }
 }
 
-export function getPublishedArticles() {
-    return unstable_cache(_getPublishedArticles, [], {
-        tags: [CACHE_TAG_ARTICLES],
-    })()
-}
+// export function getPublishedArticles() {
+//     return unstable_cache(_getPublishedArticles, [], {
+//         tags: [CACHE_TAG_ARTICLES],
+//     })()
+// }
 
 export async function getArticleBySlug(slug: string) {
     const payload = await getPayloadClient()
