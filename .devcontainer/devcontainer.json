@@ -28,7 +28,12 @@
       "**/node_modules/**": true
     },
     "vscode": {
-      "extensions": ["esbenp.prettier-vscode", "fill-labs.dependi", "dbaeumer.vscode-eslint"],
+      "extensions": [
+        "esbenp.prettier-vscode",
+        "fill-labs.dependi",
+        "dbaeumer.vscode-eslint",
+        "bradlc.vscode-tailwindcss"
+      ],
       "settings": {
         "explorer.compactFolders": false,
         "editor.fontWeight": "bold",

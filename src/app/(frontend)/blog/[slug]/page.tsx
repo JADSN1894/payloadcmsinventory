@@ -5,6 +5,7 @@ import { notFound } from 'next/navigation'
 import { relationIsObject } from '@/lib/payload/helpers/relation-is-object'
 import { RichTextField } from '@payloadcms/richtext-lexical/client'
 import { RichText } from '@/lib/payload/components/rich-text'
+import { TableExperimentItens } from './_components/table'
 
 export default async function BlogPostPage({ params }: { params: Promise<{ slug: string }> }) {
     const { slug } = await params
@@ -49,6 +50,8 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
 
             {/* content */}
             <RichText lexicalData={article.content} />
+
+            <TableExperimentItens ></TableExperimentItens>
         </div>
     )
 }
