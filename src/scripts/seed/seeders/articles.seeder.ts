@@ -4,12 +4,13 @@ import { Payload } from 'payload'
 import config from '@/payload.config'
 import { MAX_SUMMARY_LENGTH, STATUS_OPTIONS } from '@/collections/Articles/constants'
 import { createMediaFromImageUrl } from '../lib/create-media-from-image-url'
-import { slugify } from 'payload/shared' 
+import { slugify } from 'payload/shared'
+// import { readCSV } from '@/collections/CsvFile/helpers/csv'
 
-const ARTICLES_COUNT = 5
+const ARTICLES_COUNT = 1
 
 export async function seedArticles(payload: Payload) {
-    for (let i = 0; i < ARTICLES_COUNT; i++) {
+    for (let i = 0; i <= ARTICLES_COUNT; i++) {
         try {
             const imageUrl = faker.image.urlPicsumPhotos()
             const image = await createMediaFromImageUrl(payload, imageUrl)
@@ -28,6 +29,8 @@ export async function seedArticles(payload: Payload) {
 
             const status = faker.helpers.arrayElement(Object.values(STATUS_OPTIONS))
 
+            // const csv = await readCSV("src/scripts/seed/seeders/data.csv", ",")
+            // const csvString = csv.toString();
             await payload.create({
                 collection: 'articles',
                 data: {

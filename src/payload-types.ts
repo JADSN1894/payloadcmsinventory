@@ -71,6 +71,8 @@ export interface Config {
     media: Media;
     articles: Article;
     'article-authors': ArticleAuthor;
+    'csv-data': CsvDatum;
+    'csv-uploads': CsvUpload;
     'payload-kv': PayloadKv;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
@@ -82,6 +84,8 @@ export interface Config {
     media: MediaSelect<false> | MediaSelect<true>;
     articles: ArticlesSelect<false> | ArticlesSelect<true>;
     'article-authors': ArticleAuthorsSelect<false> | ArticleAuthorsSelect<true>;
+    'csv-data': CsvDataSelect<false> | CsvDataSelect<true>;
+    'csv-uploads': CsvUploadsSelect<false> | CsvUploadsSelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
@@ -195,6 +199,15 @@ export interface Article {
   publishedAt?: string | null;
   updatedAt: string;
   createdAt: string;
+  url?: string | null;
+  thumbnailURL?: string | null;
+  filename?: string | null;
+  mimeType?: string | null;
+  filesize?: number | null;
+  width?: number | null;
+  height?: number | null;
+  focalX?: number | null;
+  focalY?: number | null;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -207,6 +220,52 @@ export interface ArticleAuthor {
   role: 'Staff Writer' | 'Guest Writer' | 'Flo Rida' | 'Contributor' | 'Editor';
   updatedAt: string;
   createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "csv-data".
+ */
+export interface CsvDatum {
+  id: number;
+  sourceFile: number | CsvUpload;
+  headers?:
+    | {
+        headerName: string;
+        id?: string | null;
+      }[]
+    | null;
+  rows?:
+    | {
+        values?:
+          | {
+              value?: string | null;
+              id?: string | null;
+            }[]
+          | null;
+        id?: string | null;
+      }[]
+    | null;
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "csv-uploads".
+ */
+export interface CsvUpload {
+  id: number;
+  delimiter?: (',' | ';' | '\t') | null;
+  updatedAt: string;
+  createdAt: string;
+  url?: string | null;
+  thumbnailURL?: string | null;
+  filename: string;
+  mimeType?: string | null;
+  filesize?: number | null;
+  width?: number | null;
+  height?: number | null;
+  focalX?: number | null;
+  focalY?: number | null;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -247,6 +306,14 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'article-authors';
         value: number | ArticleAuthor;
+      } | null)
+    | ({
+        relationTo: 'csv-data';
+        value: number | CsvDatum;
+      } | null)
+    | ({
+        relationTo: 'csv-uploads';
+        value: number | CsvUpload;
       } | null);
   globalSlug?: string | null;
   user: {
@@ -347,6 +414,15 @@ export interface ArticlesSelect<T extends boolean = true> {
   publishedAt?: T;
   updatedAt?: T;
   createdAt?: T;
+  url?: T;
+  thumbnailURL?: T;
+  filename?: T;
+  mimeType?: T;
+  filesize?: T;
+  width?: T;
+  height?: T;
+  focalX?: T;
+  focalY?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
@@ -358,6 +434,50 @@ export interface ArticleAuthorsSelect<T extends boolean = true> {
   role?: T;
   updatedAt?: T;
   createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "csv-data_select".
+ */
+export interface CsvDataSelect<T extends boolean = true> {
+  sourceFile?: T;
+  headers?:
+    | T
+    | {
+        headerName?: T;
+        id?: T;
+      };
+  rows?:
+    | T
+    | {
+        values?:
+          | T
+          | {
+              value?: T;
+              id?: T;
+            };
+        id?: T;
+      };
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "csv-uploads_select".
+ */
+export interface CsvUploadsSelect<T extends boolean = true> {
+  delimiter?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  url?: T;
+  thumbnailURL?: T;
+  filename?: T;
+  mimeType?: T;
+  filesize?: T;
+  width?: T;
+  height?: T;
+  focalX?: T;
+  focalY?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema

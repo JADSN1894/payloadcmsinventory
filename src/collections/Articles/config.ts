@@ -7,6 +7,9 @@ import { revalidateTag } from 'next/cache'
 
 export const Articles: CollectionConfig = {
     slug: 'articles',
+    upload: {
+        mimeTypes: ['image/*', 'text/csv'], 
+    },
     fields: [
         {
             name: 'title',
