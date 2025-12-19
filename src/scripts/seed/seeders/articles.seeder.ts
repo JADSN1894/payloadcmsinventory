@@ -38,6 +38,7 @@ export async function seedArticles(payload: Payload) {
                     content: contentLexical,
                     contentSummary: content.slice(0, MAX_SUMMARY_LENGTH),
                     author: 1,
+                    csvSourcFileItens: 1,
                     coverImage: image.id,
                     slug: slugify(title),
                     status,

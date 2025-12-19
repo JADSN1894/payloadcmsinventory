@@ -6,11 +6,30 @@ import { relationIsObject } from '@/lib/payload/helpers/relation-is-object'
 import { RichTextField } from '@payloadcms/richtext-lexical/client'
 import { RichText } from '@/lib/payload/components/rich-text'
 import { TableExperimentItens } from './_components/table'
+import { CsvDatum } from '@/payload-types'
 
 export default async function BlogPostPage({ params }: { params: Promise<{ slug: string }> }) {
     const { slug } = await params
     const article = await getArticleBySlug(slug)
     if (!article) notFound()
+
+    let { headers, rows }: CsvDatum = article.csvSourcFileItens as CsvDatum
+
+    let headersValuesArg = headers?.map((header) => header.headerName) ?? []
+    let rowsValuesOfValues = rows!.map((row) => ({
+        values: row.values!.map(({ value }) => value!),
+    }))
+    let rowsValuesArg: string[][] = rowsValuesOfValues.map((rows) => rows.values)
+
+    // let rowsValuesFlatArg: { qtde: number; value: string }[] = rowsValues.flatMap(
+    //     (innerArray, outerIndex) => {
+    //         return innerArray.map((value) => ({
+    //             id: outerIndex,
+    //             value: value,
+    //         }))
+    //     },
+    // )
+    console.log(headersValuesArg, rowsValuesArg)
 
     if (!relationIsObject(article.coverImage)) return null
     if (!relationIsObject(article.author) || !relationIsObject(article.author.avatar)) {
@@ -51,7 +70,10 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
             {/* content */}
             <RichText lexicalData={article.content} />
 
-            <TableExperimentItens ></TableExperimentItens>
+            <TableExperimentItens
+                headers={headersValuesArg}
+                rows={rowsValuesArg}
+            ></TableExperimentItens>
         </div>
     )
 }

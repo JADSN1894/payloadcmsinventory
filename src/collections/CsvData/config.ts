@@ -1,49 +1,54 @@
 // collections/CSVData.ts
-import { CollectionConfig, Field } from 'payload';
+import { CollectionConfig } from 'payload';
+import { parseCSVBeforeValidate } from './hooks/parseCSVBeforeValidate.hook';
+import { generateHeaderFromCsvHook } from './hooks/generateHeaderFromCsv.hook';
 
 export const CSVData: CollectionConfig = {
     slug: 'csv-data',
+    upload: {
+        mimeTypes: ['text/csv'],
+        staticDir: './csv-uploads',
+    },
     fields: [
-        // {
-        //     name: 'sourceFile',
-        //     type: 'relationship',
-        //     // relationTo: 'csv-uploads',
-        //     // hasMany: false,
-        //     required: true,
-        // },
         {
-            name: 'sourceFile',
-            type: 'relationship',
-            relationTo: 'csv-uploads',
-            hasMany: false,
-            required: true,
+            name: 'delimiter',
+            type: 'select',
+            options: [
+                { label: 'Comma ( , )', value: ',' },
+                { label: 'Semicolon ( ; )', value: ';' },
+                { label: 'Tab ( \t )', value: '\t' },
+            ],
+            defaultValue: ';',
         },
         {
             name: 'headers',
             type: 'array',
-            fields: [
-                {
-                    name: 'headerName',
-                    type: 'text',
-                    required: true,
-                },
-            ],
+            fields: [{ name: 'headerName', type: 'text', required: true }],
+            // hooks: { beforeValidate: [generateHeaderFromCsvHook] },
         },
         {
             name: 'rows',
             type: 'array',
-            fields: [
-                {
-                    name: 'values',
-                    type: 'array',
-                    fields: [
-                        {
-                            name: 'value',
-                            type: 'text',
-                        },
-                    ],
-                },
-            ],
+            fields: [{
+                name: 'values',
+                type: 'array',
+                fields: [{ name: 'value', type: 'text' }],
+            }],
         },
     ],
+    hooks: {
+        beforeValidate: [
+            async ({ data, req, operation }) => {
+                console.log("[HOOK]: beforeValidate() ");
+                console.log(data)
+                console.log(req)
+                console.log(operation)
+                // Only parse on create with uploaded file
+                if (operation === 'create' && data?.filename) {
+                    return await parseCSVBeforeValidate(data, req);
+                }
+                return data;
+            },
+        ],
+    },
 };

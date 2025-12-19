@@ -4,6 +4,7 @@ export async function up({ db, payload, req }: MigrateUpArgs): Promise<void> {
   await db.execute(sql`
    CREATE TYPE "public"."enum_articles_status" AS ENUM('Draft', 'Published');
   CREATE TYPE "public"."enum_article_authors_role" AS ENUM('Staff Writer', 'Guest Writer', 'Flo Rida', 'Contributor', 'Editor');
+  CREATE TYPE "public"."enum_csv_data_delimiter" AS ENUM(',', ';', '	');
   CREATE TABLE "users_sessions" (
   	"_order" integer NOT NULL,
   	"_parent_id" integer NOT NULL,
@@ -50,7 +51,6 @@ export async function up({ db, payload, req }: MigrateUpArgs): Promise<void> {
   	"content_summary" varchar NOT NULL,
   	"read_time_in_mins" numeric DEFAULT 0,
   	"cover_image_id" integer NOT NULL,
-  	"csv_file_id" integer NOT NULL,
   	"author_id" integer NOT NULL,
   	"status" "enum_articles_status" DEFAULT 'Draft' NOT NULL,
   	"published_at" timestamp(3) with time zone,
@@ -76,6 +76,42 @@ export async function up({ db, payload, req }: MigrateUpArgs): Promise<void> {
   	"created_at" timestamp(3) with time zone DEFAULT now() NOT NULL
   );
   
+  CREATE TABLE "csv_data_headers" (
+  	"_order" integer NOT NULL,
+  	"_parent_id" integer NOT NULL,
+  	"id" varchar PRIMARY KEY NOT NULL,
+  	"header_name" varchar NOT NULL
+  );
+  
+  CREATE TABLE "csv_data_rows_values" (
+  	"_order" integer NOT NULL,
+  	"_parent_id" varchar NOT NULL,
+  	"id" varchar PRIMARY KEY NOT NULL,
+  	"value" varchar
+  );
+  
+  CREATE TABLE "csv_data_rows" (
+  	"_order" integer NOT NULL,
+  	"_parent_id" integer NOT NULL,
+  	"id" varchar PRIMARY KEY NOT NULL
+  );
+  
+  CREATE TABLE "csv_data" (
+  	"id" serial PRIMARY KEY NOT NULL,
+  	"delimiter" "enum_csv_data_delimiter" DEFAULT ',',
+  	"updated_at" timestamp(3) with time zone DEFAULT now() NOT NULL,
+  	"created_at" timestamp(3) with time zone DEFAULT now() NOT NULL,
+  	"url" varchar,
+  	"thumbnail_u_r_l" varchar,
+  	"filename" varchar,
+  	"mime_type" varchar,
+  	"filesize" numeric,
+  	"width" numeric,
+  	"height" numeric,
+  	"focal_x" numeric,
+  	"focal_y" numeric
+  );
+  
   CREATE TABLE "payload_kv" (
   	"id" serial PRIMARY KEY NOT NULL,
   	"key" varchar NOT NULL,
@@ -97,7 +133,8 @@ export async function up({ db, payload, req }: MigrateUpArgs): Promise<void> {
   	"users_id" integer,
   	"media_id" integer,
   	"articles_id" integer,
-  	"article_authors_id" integer
+  	"article_authors_id" integer,
+  	"csv_data_id" integer
   );
   
   CREATE TABLE "payload_preferences" (
@@ -126,14 +163,17 @@ export async function up({ db, payload, req }: MigrateUpArgs): Promise<void> {
   
   ALTER TABLE "users_sessions" ADD CONSTRAINT "users_sessions_parent_id_fk" FOREIGN KEY ("_parent_id") REFERENCES "public"."users"("id") ON DELETE cascade ON UPDATE no action;
   ALTER TABLE "articles" ADD CONSTRAINT "articles_cover_image_id_media_id_fk" FOREIGN KEY ("cover_image_id") REFERENCES "public"."media"("id") ON DELETE set null ON UPDATE no action;
-  ALTER TABLE "articles" ADD CONSTRAINT "articles_csv_file_id_media_id_fk" FOREIGN KEY ("csv_file_id") REFERENCES "public"."media"("id") ON DELETE set null ON UPDATE no action;
   ALTER TABLE "articles" ADD CONSTRAINT "articles_author_id_article_authors_id_fk" FOREIGN KEY ("author_id") REFERENCES "public"."article_authors"("id") ON DELETE set null ON UPDATE no action;
   ALTER TABLE "article_authors" ADD CONSTRAINT "article_authors_avatar_id_media_id_fk" FOREIGN KEY ("avatar_id") REFERENCES "public"."media"("id") ON DELETE set null ON UPDATE no action;
+  ALTER TABLE "csv_data_headers" ADD CONSTRAINT "csv_data_headers_parent_id_fk" FOREIGN KEY ("_parent_id") REFERENCES "public"."csv_data"("id") ON DELETE cascade ON UPDATE no action;
+  ALTER TABLE "csv_data_rows_values" ADD CONSTRAINT "csv_data_rows_values_parent_id_fk" FOREIGN KEY ("_parent_id") REFERENCES "public"."csv_data_rows"("id") ON DELETE cascade ON UPDATE no action;
+  ALTER TABLE "csv_data_rows" ADD CONSTRAINT "csv_data_rows_parent_id_fk" FOREIGN KEY ("_parent_id") REFERENCES "public"."csv_data"("id") ON DELETE cascade ON UPDATE no action;
   ALTER TABLE "payload_locked_documents_rels" ADD CONSTRAINT "payload_locked_documents_rels_parent_fk" FOREIGN KEY ("parent_id") REFERENCES "public"."payload_locked_documents"("id") ON DELETE cascade ON UPDATE no action;
   ALTER TABLE "payload_locked_documents_rels" ADD CONSTRAINT "payload_locked_documents_rels_users_fk" FOREIGN KEY ("users_id") REFERENCES "public"."users"("id") ON DELETE cascade ON UPDATE no action;
   ALTER TABLE "payload_locked_documents_rels" ADD CONSTRAINT "payload_locked_documents_rels_media_fk" FOREIGN KEY ("media_id") REFERENCES "public"."media"("id") ON DELETE cascade ON UPDATE no action;
   ALTER TABLE "payload_locked_documents_rels" ADD CONSTRAINT "payload_locked_documents_rels_articles_fk" FOREIGN KEY ("articles_id") REFERENCES "public"."articles"("id") ON DELETE cascade ON UPDATE no action;
   ALTER TABLE "payload_locked_documents_rels" ADD CONSTRAINT "payload_locked_documents_rels_article_authors_fk" FOREIGN KEY ("article_authors_id") REFERENCES "public"."article_authors"("id") ON DELETE cascade ON UPDATE no action;
+  ALTER TABLE "payload_locked_documents_rels" ADD CONSTRAINT "payload_locked_documents_rels_csv_data_fk" FOREIGN KEY ("csv_data_id") REFERENCES "public"."csv_data"("id") ON DELETE cascade ON UPDATE no action;
   ALTER TABLE "payload_preferences_rels" ADD CONSTRAINT "payload_preferences_rels_parent_fk" FOREIGN KEY ("parent_id") REFERENCES "public"."payload_preferences"("id") ON DELETE cascade ON UPDATE no action;
   ALTER TABLE "payload_preferences_rels" ADD CONSTRAINT "payload_preferences_rels_users_fk" FOREIGN KEY ("users_id") REFERENCES "public"."users"("id") ON DELETE cascade ON UPDATE no action;
   CREATE INDEX "users_sessions_order_idx" ON "users_sessions" USING btree ("_order");
@@ -147,7 +187,6 @@ export async function up({ db, payload, req }: MigrateUpArgs): Promise<void> {
   CREATE UNIQUE INDEX "articles_title_idx" ON "articles" USING btree ("title");
   CREATE UNIQUE INDEX "articles_slug_idx" ON "articles" USING btree ("slug");
   CREATE INDEX "articles_cover_image_idx" ON "articles" USING btree ("cover_image_id");
-  CREATE INDEX "articles_csv_file_idx" ON "articles" USING btree ("csv_file_id");
   CREATE INDEX "articles_author_idx" ON "articles" USING btree ("author_id");
   CREATE INDEX "articles_updated_at_idx" ON "articles" USING btree ("updated_at");
   CREATE INDEX "articles_created_at_idx" ON "articles" USING btree ("created_at");
@@ -156,6 +195,15 @@ export async function up({ db, payload, req }: MigrateUpArgs): Promise<void> {
   CREATE INDEX "article_authors_avatar_idx" ON "article_authors" USING btree ("avatar_id");
   CREATE INDEX "article_authors_updated_at_idx" ON "article_authors" USING btree ("updated_at");
   CREATE INDEX "article_authors_created_at_idx" ON "article_authors" USING btree ("created_at");
+  CREATE INDEX "csv_data_headers_order_idx" ON "csv_data_headers" USING btree ("_order");
+  CREATE INDEX "csv_data_headers_parent_id_idx" ON "csv_data_headers" USING btree ("_parent_id");
+  CREATE INDEX "csv_data_rows_values_order_idx" ON "csv_data_rows_values" USING btree ("_order");
+  CREATE INDEX "csv_data_rows_values_parent_id_idx" ON "csv_data_rows_values" USING btree ("_parent_id");
+  CREATE INDEX "csv_data_rows_order_idx" ON "csv_data_rows" USING btree ("_order");
+  CREATE INDEX "csv_data_rows_parent_id_idx" ON "csv_data_rows" USING btree ("_parent_id");
+  CREATE INDEX "csv_data_updated_at_idx" ON "csv_data" USING btree ("updated_at");
+  CREATE INDEX "csv_data_created_at_idx" ON "csv_data" USING btree ("created_at");
+  CREATE UNIQUE INDEX "csv_data_filename_idx" ON "csv_data" USING btree ("filename");
   CREATE UNIQUE INDEX "payload_kv_key_idx" ON "payload_kv" USING btree ("key");
   CREATE INDEX "payload_locked_documents_global_slug_idx" ON "payload_locked_documents" USING btree ("global_slug");
   CREATE INDEX "payload_locked_documents_updated_at_idx" ON "payload_locked_documents" USING btree ("updated_at");
@@ -167,6 +215,7 @@ export async function up({ db, payload, req }: MigrateUpArgs): Promise<void> {
   CREATE INDEX "payload_locked_documents_rels_media_id_idx" ON "payload_locked_documents_rels" USING btree ("media_id");
   CREATE INDEX "payload_locked_documents_rels_articles_id_idx" ON "payload_locked_documents_rels" USING btree ("articles_id");
   CREATE INDEX "payload_locked_documents_rels_article_authors_id_idx" ON "payload_locked_documents_rels" USING btree ("article_authors_id");
+  CREATE INDEX "payload_locked_documents_rels_csv_data_id_idx" ON "payload_locked_documents_rels" USING btree ("csv_data_id");
   CREATE INDEX "payload_preferences_key_idx" ON "payload_preferences" USING btree ("key");
   CREATE INDEX "payload_preferences_updated_at_idx" ON "payload_preferences" USING btree ("updated_at");
   CREATE INDEX "payload_preferences_created_at_idx" ON "payload_preferences" USING btree ("created_at");
@@ -185,6 +234,10 @@ export async function down({ db, payload, req }: MigrateDownArgs): Promise<void>
   DROP TABLE "media" CASCADE;
   DROP TABLE "articles" CASCADE;
   DROP TABLE "article_authors" CASCADE;
+  DROP TABLE "csv_data_headers" CASCADE;
+  DROP TABLE "csv_data_rows_values" CASCADE;
+  DROP TABLE "csv_data_rows" CASCADE;
+  DROP TABLE "csv_data" CASCADE;
   DROP TABLE "payload_kv" CASCADE;
   DROP TABLE "payload_locked_documents" CASCADE;
   DROP TABLE "payload_locked_documents_rels" CASCADE;
@@ -192,5 +245,6 @@ export async function down({ db, payload, req }: MigrateDownArgs): Promise<void>
   DROP TABLE "payload_preferences_rels" CASCADE;
   DROP TABLE "payload_migrations" CASCADE;
   DROP TYPE "public"."enum_articles_status";
-  DROP TYPE "public"."enum_article_authors_role";`)
+  DROP TYPE "public"."enum_article_authors_role";
+  DROP TYPE "public"."enum_csv_data_delimiter";`)
 }

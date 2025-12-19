@@ -104,7 +104,7 @@ export const parseCSV = async (doc: any, req: PayloadRequest) => {
 
         // Create CSV data entry
         await req.payload.create({
-            collection: 'csv-data' as any,
+            collection: 'csv-data',
             data: {
                 sourceFile: doc.id,
                 headers: headers.map(h => ({ headerName: h })),

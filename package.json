@@ -15,7 +15,9 @@
         "payload": "cross-env NODE_OPTIONS=--no-deprecation payload",
         "start": "cross-env NODE_OPTIONS=--no-deprecation next start",
         "seed": "tsx -r dotenv/config src/scripts/seed/script.ts",
-        "nuke": "psql -d payload_next_blog -c \"DROP SCHEMA public CASCADE; CREATE SCHEMA public;\" && pnpm payload migrate:fresh && pnpm seed"
+        "nuke": "psql -d payload_next_blog -c \"DROP SCHEMA public CASCADE; CREATE SCHEMA public;\" && pnpm payload migrate:fresh && pnpm seed",
+        "types": "npm run payload generate:types && npm run payload generate:db-schema",
+        "reset": "rm -rfv articles csv-files media csv-uploads && npm run types && npm run payload migrate:fresh && npm run seed && npm run dev"
     },
     "dependencies": {
         "@payloadcms/db-postgres": "3.68.5",

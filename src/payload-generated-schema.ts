@@ -29,6 +29,7 @@ export const enum_article_authors_role = pgEnum('enum_article_authors_role', [
     'Contributor',
     'Editor',
 ])
+export const enum_csv_data_delimiter = pgEnum('enum_csv_data_delimiter', [',', ';', '	'])
 
 export const users_sessions = pgTable(
     'users_sessions',
@@ -131,6 +132,11 @@ export const articles = pgTable(
             .references(() => article_authors.id, {
                 onDelete: 'set null',
             }),
+        csvSourcFileItens: integer('csv_sourc_file_itens_id')
+            .notNull()
+            .references(() => csv_data.id, {
+                onDelete: 'set null',
+            }),
         status: enum_articles_status('status').notNull().default('Draft'),
         publishedAt: timestamp('published_at', {
             mode: 'string',
@@ -143,14 +149,25 @@ export const articles = pgTable(
         createdAt: timestamp('created_at', { mode: 'string', withTimezone: true, precision: 3 })
             .defaultNow()
             .notNull(),
+        url: varchar('url'),
+        thumbnailURL: varchar('thumbnail_u_r_l'),
+        filename: varchar('filename'),
+        mimeType: varchar('mime_type'),
+        filesize: numeric('filesize', { mode: 'number' }),
+        width: numeric('width', { mode: 'number' }),
+        height: numeric('height', { mode: 'number' }),
+        focalX: numeric('focal_x', { mode: 'number' }),
+        focalY: numeric('focal_y', { mode: 'number' }),
     },
     (columns) => [
         uniqueIndex('articles_title_idx').on(columns.title),
         uniqueIndex('articles_slug_idx').on(columns.slug),
         index('articles_cover_image_idx').on(columns.coverImage),
         index('articles_author_idx').on(columns.author),
+        index('articles_csv_sourc_file_itens_idx').on(columns.csvSourcFileItens),
         index('articles_updated_at_idx').on(columns.updatedAt),
         index('articles_created_at_idx').on(columns.createdAt),
+        uniqueIndex('articles_filename_idx').on(columns.filename),
     ],
 )
 
@@ -177,6 +194,90 @@ export const article_authors = pgTable(
         index('article_authors_avatar_idx').on(columns.avatar),
         index('article_authors_updated_at_idx').on(columns.updatedAt),
         index('article_authors_created_at_idx').on(columns.createdAt),
+    ],
+)
+
+export const csv_data_headers = pgTable(
+    'csv_data_headers',
+    {
+        _order: integer('_order').notNull(),
+        _parentID: integer('_parent_id').notNull(),
+        id: varchar('id').primaryKey(),
+        headerName: varchar('header_name').notNull(),
+    },
+    (columns) => [
+        index('csv_data_headers_order_idx').on(columns._order),
+        index('csv_data_headers_parent_id_idx').on(columns._parentID),
+        foreignKey({
+            columns: [columns['_parentID']],
+            foreignColumns: [csv_data.id],
+            name: 'csv_data_headers_parent_id_fk',
+        }).onDelete('cascade'),
+    ],
+)
+
+export const csv_data_rows_values = pgTable(
+    'csv_data_rows_values',
+    {
+        _order: integer('_order').notNull(),
+        _parentID: varchar('_parent_id').notNull(),
+        id: varchar('id').primaryKey(),
+        value: varchar('value'),
+    },
+    (columns) => [
+        index('csv_data_rows_values_order_idx').on(columns._order),
+        index('csv_data_rows_values_parent_id_idx').on(columns._parentID),
+        foreignKey({
+            columns: [columns['_parentID']],
+            foreignColumns: [csv_data_rows.id],
+            name: 'csv_data_rows_values_parent_id_fk',
+        }).onDelete('cascade'),
+    ],
+)
+
+export const csv_data_rows = pgTable(
+    'csv_data_rows',
+    {
+        _order: integer('_order').notNull(),
+        _parentID: integer('_parent_id').notNull(),
+        id: varchar('id').primaryKey(),
+    },
+    (columns) => [
+        index('csv_data_rows_order_idx').on(columns._order),
+        index('csv_data_rows_parent_id_idx').on(columns._parentID),
+        foreignKey({
+            columns: [columns['_parentID']],
+            foreignColumns: [csv_data.id],
+            name: 'csv_data_rows_parent_id_fk',
+        }).onDelete('cascade'),
+    ],
+)
+
+export const csv_data = pgTable(
+    'csv_data',
+    {
+        id: serial('id').primaryKey(),
+        delimiter: enum_csv_data_delimiter('delimiter').default(';'),
+        updatedAt: timestamp('updated_at', { mode: 'string', withTimezone: true, precision: 3 })
+            .defaultNow()
+            .notNull(),
+        createdAt: timestamp('created_at', { mode: 'string', withTimezone: true, precision: 3 })
+            .defaultNow()
+            .notNull(),
+        url: varchar('url'),
+        thumbnailURL: varchar('thumbnail_u_r_l'),
+        filename: varchar('filename'),
+        mimeType: varchar('mime_type'),
+        filesize: numeric('filesize', { mode: 'number' }),
+        width: numeric('width', { mode: 'number' }),
+        height: numeric('height', { mode: 'number' }),
+        focalX: numeric('focal_x', { mode: 'number' }),
+        focalY: numeric('focal_y', { mode: 'number' }),
+    },
+    (columns) => [
+        index('csv_data_updated_at_idx').on(columns.updatedAt),
+        index('csv_data_created_at_idx').on(columns.createdAt),
+        uniqueIndex('csv_data_filename_idx').on(columns.filename),
     ],
 )
 
@@ -220,6 +321,7 @@ export const payload_locked_documents_rels = pgTable(
         mediaID: integer('media_id'),
         articlesID: integer('articles_id'),
         'article-authorsID': integer('article_authors_id'),
+        'csv-dataID': integer('csv_data_id'),
     },
     (columns) => [
         index('payload_locked_documents_rels_order_idx').on(columns.order),
@@ -231,6 +333,7 @@ export const payload_locked_documents_rels = pgTable(
         index('payload_locked_documents_rels_article_authors_id_idx').on(
             columns['article-authorsID'],
         ),
+        index('payload_locked_documents_rels_csv_data_id_idx').on(columns['csv-dataID']),
         foreignKey({
             columns: [columns['parent']],
             foreignColumns: [payload_locked_documents.id],
@@ -255,6 +358,11 @@ export const payload_locked_documents_rels = pgTable(
             columns: [columns['article-authorsID']],
             foreignColumns: [article_authors.id],
             name: 'payload_locked_documents_rels_article_authors_fk',
+        }).onDelete('cascade'),
+        foreignKey({
+            columns: [columns['csv-dataID']],
+            foreignColumns: [csv_data.id],
+            name: 'payload_locked_documents_rels_csv_data_fk',
         }).onDelete('cascade'),
     ],
 )
@@ -349,12 +457,49 @@ export const relations_articles = relations(articles, ({ one }) => ({
         references: [article_authors.id],
         relationName: 'author',
     }),
+    csvSourcFileItens: one(csv_data, {
+        fields: [articles.csvSourcFileItens],
+        references: [csv_data.id],
+        relationName: 'csvSourcFileItens',
+    }),
 }))
 export const relations_article_authors = relations(article_authors, ({ one }) => ({
     avatar: one(media, {
         fields: [article_authors.avatar],
         references: [media.id],
         relationName: 'avatar',
+    }),
+}))
+export const relations_csv_data_headers = relations(csv_data_headers, ({ one }) => ({
+    _parentID: one(csv_data, {
+        fields: [csv_data_headers._parentID],
+        references: [csv_data.id],
+        relationName: 'headers',
+    }),
+}))
+export const relations_csv_data_rows_values = relations(csv_data_rows_values, ({ one }) => ({
+    _parentID: one(csv_data_rows, {
+        fields: [csv_data_rows_values._parentID],
+        references: [csv_data_rows.id],
+        relationName: 'values',
+    }),
+}))
+export const relations_csv_data_rows = relations(csv_data_rows, ({ one, many }) => ({
+    _parentID: one(csv_data, {
+        fields: [csv_data_rows._parentID],
+        references: [csv_data.id],
+        relationName: 'rows',
+    }),
+    values: many(csv_data_rows_values, {
+        relationName: 'values',
+    }),
+}))
+export const relations_csv_data = relations(csv_data, ({ many }) => ({
+    headers: many(csv_data_headers, {
+        relationName: 'headers',
+    }),
+    rows: many(csv_data_rows, {
+        relationName: 'rows',
     }),
 }))
 export const relations_payload_kv = relations(payload_kv, () => ({}))
@@ -385,6 +530,11 @@ export const relations_payload_locked_documents_rels = relations(
             fields: [payload_locked_documents_rels['article-authorsID']],
             references: [article_authors.id],
             relationName: 'article-authors',
+        }),
+        'csv-dataID': one(csv_data, {
+            fields: [payload_locked_documents_rels['csv-dataID']],
+            references: [csv_data.id],
+            relationName: 'csv-data',
         }),
     }),
 )
@@ -421,11 +571,16 @@ export const relations_payload_migrations = relations(payload_migrations, () => 
 type DatabaseSchema = {
     enum_articles_status: typeof enum_articles_status
     enum_article_authors_role: typeof enum_article_authors_role
+    enum_csv_data_delimiter: typeof enum_csv_data_delimiter
     users_sessions: typeof users_sessions
     users: typeof users
     media: typeof media
     articles: typeof articles
     article_authors: typeof article_authors
+    csv_data_headers: typeof csv_data_headers
+    csv_data_rows_values: typeof csv_data_rows_values
+    csv_data_rows: typeof csv_data_rows
+    csv_data: typeof csv_data
     payload_kv: typeof payload_kv
     payload_locked_documents: typeof payload_locked_documents
     payload_locked_documents_rels: typeof payload_locked_documents_rels
@@ -437,6 +592,10 @@ type DatabaseSchema = {
     relations_media: typeof relations_media
     relations_articles: typeof relations_articles
     relations_article_authors: typeof relations_article_authors
+    relations_csv_data_headers: typeof relations_csv_data_headers
+    relations_csv_data_rows_values: typeof relations_csv_data_rows_values
+    relations_csv_data_rows: typeof relations_csv_data_rows
+    relations_csv_data: typeof relations_csv_data
     relations_payload_kv: typeof relations_payload_kv
     relations_payload_locked_documents_rels: typeof relations_payload_locked_documents_rels
     relations_payload_locked_documents: typeof relations_payload_locked_documents

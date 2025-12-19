@@ -1,6 +1,6 @@
 import { convertLexicalToPlaintext } from '@payloadcms/richtext-lexical/plaintext'
 import type { CollectionConfig } from 'payload'
-import {  CACHE_TAG_ARTICLES, STATUS_OPTIONS } from './constants'
+import { CACHE_TAG_ARTICLES, STATUS_OPTIONS } from './constants'
 import { generateContentSummaryHook } from './hooks/generate-content-summary.hook'
 import { generateSlugHook } from './hooks/generate-slug.hook'
 import { revalidateTag } from 'next/cache'
@@ -8,7 +8,7 @@ import { revalidateTag } from 'next/cache'
 export const Articles: CollectionConfig = {
     slug: 'articles',
     upload: {
-        mimeTypes: ['image/*', 'text/csv'], 
+        mimeTypes: ['image/*', 'text/csv'],
     },
     fields: [
         {
@@ -66,6 +66,12 @@ export const Articles: CollectionConfig = {
             name: 'author',
             type: 'relationship',
             relationTo: 'article-authors',
+            required: true,
+        },
+        {
+            name: 'csvSourcFileItens',
+            type: 'relationship',
+            relationTo: 'csv-data',
             required: true,
         },
         {

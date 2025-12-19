@@ -72,7 +72,6 @@ export interface Config {
     articles: Article;
     'article-authors': ArticleAuthor;
     'csv-data': CsvDatum;
-    'csv-uploads': CsvUpload;
     'payload-kv': PayloadKv;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
@@ -85,7 +84,6 @@ export interface Config {
     articles: ArticlesSelect<false> | ArticlesSelect<true>;
     'article-authors': ArticleAuthorsSelect<false> | ArticleAuthorsSelect<true>;
     'csv-data': CsvDataSelect<false> | CsvDataSelect<true>;
-    'csv-uploads': CsvUploadsSelect<false> | CsvUploadsSelect<true>;
     'payload-kv': PayloadKvSelect<false> | PayloadKvSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
@@ -195,6 +193,7 @@ export interface Article {
   readTimeInMins?: number | null;
   coverImage: number | Media;
   author: number | ArticleAuthor;
+  csvSourcFileItens: number | CsvDatum;
   status: 'Draft' | 'Published';
   publishedAt?: string | null;
   updatedAt: string;
@@ -227,7 +226,7 @@ export interface ArticleAuthor {
  */
 export interface CsvDatum {
   id: number;
-  sourceFile: number | CsvUpload;
+  delimiter?: (',' | ';' | '\t') | null;
   headers?:
     | {
         headerName: string;
@@ -247,19 +246,9 @@ export interface CsvDatum {
     | null;
   updatedAt: string;
   createdAt: string;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "csv-uploads".
- */
-export interface CsvUpload {
-  id: number;
-  delimiter?: (',' | ';' | '\t') | null;
-  updatedAt: string;
-  createdAt: string;
   url?: string | null;
   thumbnailURL?: string | null;
-  filename: string;
+  filename?: string | null;
   mimeType?: string | null;
   filesize?: number | null;
   width?: number | null;
@@ -310,10 +299,6 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'csv-data';
         value: number | CsvDatum;
-      } | null)
-    | ({
-        relationTo: 'csv-uploads';
-        value: number | CsvUpload;
       } | null);
   globalSlug?: string | null;
   user: {
@@ -410,6 +395,7 @@ export interface ArticlesSelect<T extends boolean = true> {
   readTimeInMins?: T;
   coverImage?: T;
   author?: T;
+  csvSourcFileItens?: T;
   status?: T;
   publishedAt?: T;
   updatedAt?: T;
@@ -440,7 +426,7 @@ export interface ArticleAuthorsSelect<T extends boolean = true> {
  * via the `definition` "csv-data_select".
  */
 export interface CsvDataSelect<T extends boolean = true> {
-  sourceFile?: T;
+  delimiter?: T;
   headers?:
     | T
     | {
@@ -458,15 +444,6 @@ export interface CsvDataSelect<T extends boolean = true> {
             };
         id?: T;
       };
-  updatedAt?: T;
-  createdAt?: T;
-}
-/**
- * This interface was referenced by `Config`'s JSON-Schema
- * via the `definition` "csv-uploads_select".
- */
-export interface CsvUploadsSelect<T extends boolean = true> {
-  delimiter?: T;
   updatedAt?: T;
   createdAt?: T;
   url?: T;

@@ -12,7 +12,6 @@ import { env } from './lib/env'
 import { Articles } from './collections/Articles/config'
 import { ArticleAuthors } from './collections/ArticleAuthors/config'
 import { CSVData } from './collections/CsvData/config'
-import { CSVUploads } from './collections/CsvUpload/config'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
@@ -28,7 +27,7 @@ export default buildConfig({
             password: env.CMS_SEED_ADMIN_PASSWORD,
         },
     },
-    collections: [Users, Media, Articles, ArticleAuthors, CSVData, CSVUploads],
+    collections: [Users, Media, Articles, ArticleAuthors, CSVData],
     editor: lexicalEditor({
         features: ({ defaultFeatures }) => [...defaultFeatures, FixedToolbarFeature()],
     }),

@@ -15,7 +15,7 @@ const afterChangeHook: CollectionAfterChangeHook = async ({ doc, req, operation 
     console.log(doc);
 
     const headers = req.file.data.length > 0 ? Object.keys(req.file.data[0]).map(key => ({ value: key })) : [];
-    // const rows = req.file.data.map(record => ({ values: Object.values(record).map(value => ({ value: value as string })) }));
+    const rows = req.file.data.map(record => ({ values: Object.values(record).map(value => ({ value: value as string })) }));
 
     console.log(headers);
 
@@ -32,7 +32,8 @@ const afterChangeHook: CollectionAfterChangeHook = async ({ doc, req, operation 
         collection: 'csv-files',
         id: doc.id,
         data: {
-          headers
+          headers,
+          rows
           // updated data fields
         },
         req, // Pass the request object to stay within the same transaction
