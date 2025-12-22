@@ -203,7 +203,7 @@ export const csv_data_headers = pgTable(
         _order: integer('_order').notNull(),
         _parentID: integer('_parent_id').notNull(),
         id: varchar('id').primaryKey(),
-        headerName: varchar('header_name').notNull(),
+        data: varchar('data').notNull(),
     },
     (columns) => [
         index('csv_data_headers_order_idx').on(columns._order),
@@ -216,8 +216,8 @@ export const csv_data_headers = pgTable(
     ],
 )
 
-export const csv_data_rows_values = pgTable(
-    'csv_data_rows_values',
+export const csv_data_rows_data = pgTable(
+    'csv_data_rows_data',
     {
         _order: integer('_order').notNull(),
         _parentID: varchar('_parent_id').notNull(),
@@ -225,12 +225,12 @@ export const csv_data_rows_values = pgTable(
         value: varchar('value'),
     },
     (columns) => [
-        index('csv_data_rows_values_order_idx').on(columns._order),
-        index('csv_data_rows_values_parent_id_idx').on(columns._parentID),
+        index('csv_data_rows_data_order_idx').on(columns._order),
+        index('csv_data_rows_data_parent_id_idx').on(columns._parentID),
         foreignKey({
             columns: [columns['_parentID']],
             foreignColumns: [csv_data_rows.id],
-            name: 'csv_data_rows_values_parent_id_fk',
+            name: 'csv_data_rows_data_parent_id_fk',
         }).onDelete('cascade'),
     ],
 )
@@ -477,11 +477,11 @@ export const relations_csv_data_headers = relations(csv_data_headers, ({ one }) 
         relationName: 'headers',
     }),
 }))
-export const relations_csv_data_rows_values = relations(csv_data_rows_values, ({ one }) => ({
+export const relations_csv_data_rows_data = relations(csv_data_rows_data, ({ one }) => ({
     _parentID: one(csv_data_rows, {
-        fields: [csv_data_rows_values._parentID],
+        fields: [csv_data_rows_data._parentID],
         references: [csv_data_rows.id],
-        relationName: 'values',
+        relationName: 'data',
     }),
 }))
 export const relations_csv_data_rows = relations(csv_data_rows, ({ one, many }) => ({
@@ -490,8 +490,8 @@ export const relations_csv_data_rows = relations(csv_data_rows, ({ one, many }) 
         references: [csv_data.id],
         relationName: 'rows',
     }),
-    values: many(csv_data_rows_values, {
-        relationName: 'values',
+    data: many(csv_data_rows_data, {
+        relationName: 'data',
     }),
 }))
 export const relations_csv_data = relations(csv_data, ({ many }) => ({
@@ -578,7 +578,7 @@ type DatabaseSchema = {
     articles: typeof articles
     article_authors: typeof article_authors
     csv_data_headers: typeof csv_data_headers
-    csv_data_rows_values: typeof csv_data_rows_values
+    csv_data_rows_data: typeof csv_data_rows_data
     csv_data_rows: typeof csv_data_rows
     csv_data: typeof csv_data
     payload_kv: typeof payload_kv
@@ -593,7 +593,7 @@ type DatabaseSchema = {
     relations_articles: typeof relations_articles
     relations_article_authors: typeof relations_article_authors
     relations_csv_data_headers: typeof relations_csv_data_headers
-    relations_csv_data_rows_values: typeof relations_csv_data_rows_values
+    relations_csv_data_rows_data: typeof relations_csv_data_rows_data
     relations_csv_data_rows: typeof relations_csv_data_rows
     relations_csv_data: typeof relations_csv_data
     relations_payload_kv: typeof relations_payload_kv

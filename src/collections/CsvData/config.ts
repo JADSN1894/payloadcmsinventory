@@ -23,26 +23,26 @@ export const CSVData: CollectionConfig = {
         {
             name: 'headers',
             type: 'array',
-            fields: [{ name: 'headerName', type: 'text', required: true }],
+            fields: [{ name: 'data', type: 'text', required: true }],
             // hooks: { beforeValidate: [generateHeaderFromCsvHook] },
         },
         {
             name: 'rows',
             type: 'array',
             fields: [{
-                name: 'values',
+                name: 'data',
                 type: 'array',
-                fields: [{ name: 'value', type: 'text' }],
+                fields: [{ name: 'data', type: 'text' }],
             }],
         },
     ],
     hooks: {
         beforeValidate: [
             async ({ data, req, operation }) => {
-                console.log("[HOOK]: beforeValidate() ");
-                console.log(data)
-                console.log(req)
-                console.log(operation)
+                // console.log("[HOOK]: beforeValidate() ");
+                // console.log(data)
+                // console.log(req)
+                // console.log(operation)
                 // Only parse on create with uploaded file
                 if (operation === 'create' && data?.filename) {
                     return await parseCSVBeforeValidate(data, req);

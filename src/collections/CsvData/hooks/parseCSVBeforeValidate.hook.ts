@@ -44,9 +44,9 @@ export const parseCSVBeforeValidate = async (data: any, req: PayloadRequest) => 
             const rows = results.slice(1);
 
             // ✅ Add parsed data directly to the document before save
-            data.headers = headers.map(h => ({ headerName: String(h) }));
+            data.headers = headers.map(h => ({ data: String(h) }));
             data.rows = rows.map(row => ({
-                values: row.map((v: any) => ({ value: String(v ?? '') }))
+                data: row.map((v: any) => ({ data: String(v ?? '') }))
             }));
         }
 

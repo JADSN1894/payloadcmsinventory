@@ -410,6 +410,12 @@
           "primaryKey": false,
           "notNull": true
         },
+        "csv_sourc_file_itens_id": {
+          "name": "csv_sourc_file_itens_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
         "status": {
           "name": "status",
           "type": "enum_articles_status",
@@ -554,6 +560,21 @@
           "method": "btree",
           "with": {}
         },
+        "articles_csv_sourc_file_itens_idx": {
+          "name": "articles_csv_sourc_file_itens_idx",
+          "columns": [
+            {
+              "expression": "csv_sourc_file_itens_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
         "articles_updated_at_idx": {
           "name": "articles_updated_at_idx",
           "columns": [
@@ -620,6 +641,19 @@
           "tableTo": "article_authors",
           "columnsFrom": [
             "author_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "set null",
+          "onUpdate": "no action"
+        },
+        "articles_csv_sourc_file_itens_id_csv_data_id_fk": {
+          "name": "articles_csv_sourc_file_itens_id_csv_data_id_fk",
+          "tableFrom": "articles",
+          "tableTo": "csv_data",
+          "columnsFrom": [
+            "csv_sourc_file_itens_id"
           ],
           "columnsTo": [
             "id"
@@ -784,8 +818,8 @@
           "primaryKey": true,
           "notNull": true
         },
-        "header_name": {
-          "name": "header_name",
+        "data": {
+          "name": "data",
           "type": "varchar",
           "primaryKey": false,
           "notNull": true
@@ -844,8 +878,8 @@
       "checkConstraints": {},
       "isRLSEnabled": false
     },
-    "public.csv_data_rows_values": {
-      "name": "csv_data_rows_values",
+    "public.csv_data_rows_data": {
+      "name": "csv_data_rows_data",
       "schema": "",
       "columns": {
         "_order": {
@@ -874,8 +908,8 @@
         }
       },
       "indexes": {
-        "csv_data_rows_values_order_idx": {
-          "name": "csv_data_rows_values_order_idx",
+        "csv_data_rows_data_order_idx": {
+          "name": "csv_data_rows_data_order_idx",
           "columns": [
             {
               "expression": "_order",
@@ -889,8 +923,8 @@
           "method": "btree",
           "with": {}
         },
-        "csv_data_rows_values_parent_id_idx": {
-          "name": "csv_data_rows_values_parent_id_idx",
+        "csv_data_rows_data_parent_id_idx": {
+          "name": "csv_data_rows_data_parent_id_idx",
           "columns": [
             {
               "expression": "_parent_id",
@@ -906,9 +940,9 @@
         }
       },
       "foreignKeys": {
-        "csv_data_rows_values_parent_id_fk": {
-          "name": "csv_data_rows_values_parent_id_fk",
-          "tableFrom": "csv_data_rows_values",
+        "csv_data_rows_data_parent_id_fk": {
+          "name": "csv_data_rows_data_parent_id_fk",
+          "tableFrom": "csv_data_rows_data",
           "tableTo": "csv_data_rows",
           "columnsFrom": [
             "_parent_id"
@@ -1018,7 +1052,7 @@
           "typeSchema": "public",
           "primaryKey": false,
           "notNull": false,
-          "default": "','"
+          "default": "';'"
         },
         "updated_at": {
           "name": "updated_at",
@@ -1881,6 +1915,6 @@
     "tables": {},
     "columns": {}
   },
-  "id": "dcafeb9e-61ac-42db-8da3-74ff503ba472",
+  "id": "33ff5c5a-34ae-441b-9239-90bf13242944",
   "prevId": "00000000-0000-0000-0000-000000000000"
 }

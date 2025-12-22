@@ -9,9 +9,9 @@ async function main() {
     const payload = await getPayloadClient()
     try {
         await seedAdmin(payload)
-        await seedArticleAuthor(payload)
-        await seedArticles(payload)
         await seedCsvData(payload)
+        // await seedArticleAuthor(payload)
+        // await seedArticles(payload)
         process.exit(0)
     } catch (error) {
         console.error(error)

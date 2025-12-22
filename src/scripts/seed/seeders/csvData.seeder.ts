@@ -1,43 +1,34 @@
 import { Payload } from "payload";
 import { parse } from 'csv-parse/sync';
 import fs from 'fs';
+import { faker } from "@faker-js/faker";
 
 export async function seedCsvData(payload: Payload) {
     try {
-        let filePath = 'src/scripts/seed/seeders/data.csv';
-
-        if (!fs.existsSync(filePath)) {
-            console.error(`[seedCsvData] File not found: ${filePath}`);
-            // return data; // Continue without parsing
-        }
-
-        const csvContent = fs.readFileSync(filePath, 'utf8');
+        const FILEPATH = 'src/scripts/seed/seeders/data.csv'
+        const csvContent = fs.readFileSync(FILEPATH, 'utf8');
         const results = parse(csvContent, {
             delimiter: ';',
             columns: false, // Return array of arrays
             trim: true,
         });
 
-        if (results.length > 0) {
+        const headers = results[0].map((header: string) => ({ data: header }));
+        const payloadRows = results.slice(1).map((row: string[]) => ({
+            data: row.map((cell: string) => ({ data: cell || "" })),
+        }));
 
-            // ✅ Add parsed data directly to the document before save
-            let headers = results.map(h => ({ headerName: String(h) }));
-            let rows = results.map(row => ({
-                values: row.map((v: any) => ({ value: String(v ?? '') }))
-            }));
-
-            await payload.create({
-                collection: 'csv-data',
-                data: {
-                    id: 1,
-                    headers,
-                    rows,
-
-                },
-                draft: true,
-            })
-
-        }
+        await payload.create({
+            collection: "csv-data",
+            data: { delimiter: ";", headers, rows: payloadRows },
+            file: {
+                data: fs.readFileSync(FILEPATH),
+                mimetype: "text/csv",
+                name: `${faker.person.fullName()}.csv`,
+                size: fs.statSync(FILEPATH).size,
+            },
+            draft: true,
+        });
     } catch (error) {
         console.error(`[seedCsvData]: ${error}`);
 

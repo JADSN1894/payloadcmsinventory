@@ -229,15 +229,15 @@ export interface CsvDatum {
   delimiter?: (',' | ';' | '\t') | null;
   headers?:
     | {
-        headerName: string;
+        data: string;
         id?: string | null;
       }[]
     | null;
   rows?:
     | {
-        values?:
+        data?:
           | {
-              value?: string | null;
+              data?: string | null;
               id?: string | null;
             }[]
           | null;
@@ -430,16 +430,16 @@ export interface CsvDataSelect<T extends boolean = true> {
   headers?:
     | T
     | {
-        headerName?: T;
+        data?: T;
         id?: T;
       };
   rows?:
     | T
     | {
-        values?:
+        data?:
           | T
           | {
-              value?: T;
+              data?: T;
               id?: T;
             };
         id?: T;
