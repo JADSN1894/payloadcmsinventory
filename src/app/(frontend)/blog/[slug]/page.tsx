@@ -15,21 +15,13 @@ export default async function BlogPostPage({ params }: { params: Promise<{ slug:
 
     let { headers, rows }: CsvDatum = article.csvSourcFileItens as CsvDatum
 
-    let headersValuesArg = headers?.map((header) => header.headerName) ?? []
+    let headersValuesArg = headers?.map((header) => header.data) ?? []
     let rowsValuesOfValues = rows!.map((row) => ({
-        values: row.values!.map(({ value }) => value!),
+        values: row.data!.map(({ data }) => data!),
     }))
     let rowsValuesArg: string[][] = rowsValuesOfValues.map((rows) => rows.values)
 
-    // let rowsValuesFlatArg: { qtde: number; value: string }[] = rowsValues.flatMap(
-    //     (innerArray, outerIndex) => {
-    //         return innerArray.map((value) => ({
-    //             id: outerIndex,
-    //             value: value,
-    //         }))
-    //     },
-    // )
-    console.log(headersValuesArg, rowsValuesArg)
+    // console.log(headersValuesArg, rowsValuesArg)
 
     if (!relationIsObject(article.coverImage)) return null
     if (!relationIsObject(article.author) || !relationIsObject(article.author.avatar)) {

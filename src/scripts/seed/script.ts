@@ -10,8 +10,8 @@ async function main() {
     try {
         await seedAdmin(payload)
         await seedCsvData(payload)
-        // await seedArticleAuthor(payload)
-        // await seedArticles(payload)
+        await seedArticleAuthor(payload)
+        await seedArticles(payload)
         process.exit(0)
     } catch (error) {
         console.error(error)
