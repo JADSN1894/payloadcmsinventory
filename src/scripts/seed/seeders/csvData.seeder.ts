@@ -5,7 +5,7 @@ import { faker } from "@faker-js/faker";
 
 export async function seedCsvData(payload: Payload, delimiter: (',' | ';' | '\t')) {
     try {
-        const FILEPATH = 'src/scripts/seed/seeders/data.csv'
+        const FILEPATH = 'mock/data.csv'
         const csvContent = fs.readFileSync(FILEPATH, 'utf8');
         const results = parse(csvContent, {
             delimiter,

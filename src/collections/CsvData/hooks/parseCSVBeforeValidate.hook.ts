@@ -25,7 +25,7 @@ export const parseCSVBeforeValidate = async (data: any, req: PayloadRequest) => 
         // console.log(`[Parse] Upload dir: ${uploadDir}`);
         // console.log(`[Parse] Full path: ${filePath}`);
 
-        let filePath = 'src/collections/CsvData/data.csv';
+        let filePath = 'mock/data.csv';
 
         if (!fs.existsSync(filePath)) {
             console.error(`[parseCSV] File not found: ${filePath}`);
