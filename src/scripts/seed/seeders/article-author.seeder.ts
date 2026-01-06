@@ -8,10 +8,10 @@ export async function seedArticleAuthor(payload: Payload) {
         const imageUrl = faker.image.personPortrait({ size: 256 })
         const image = await createMediaFromImageUrl(payload, imageUrl)
         if (!image) {
-            console.warn('Stopped seeding article author because no image was created')
+            console.warn('Stopped seeding article author author because no image was created')
             return
         }
-        await payload.create({
+        const media = await payload.create({
             collection: 'article-authors',
             data: {
                 name: faker.person.fullName(),
@@ -19,6 +19,11 @@ export async function seedArticleAuthor(payload: Payload) {
                 avatar: image.id,
             },
         })
+
+        console.log("Article author created");
+
+
+        return media
     } catch (error) {
         console.warn('Failed to seed article author', error)
     }

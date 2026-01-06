@@ -149,15 +149,6 @@ export const articles = pgTable(
         createdAt: timestamp('created_at', { mode: 'string', withTimezone: true, precision: 3 })
             .defaultNow()
             .notNull(),
-        url: varchar('url'),
-        thumbnailURL: varchar('thumbnail_u_r_l'),
-        filename: varchar('filename'),
-        mimeType: varchar('mime_type'),
-        filesize: numeric('filesize', { mode: 'number' }),
-        width: numeric('width', { mode: 'number' }),
-        height: numeric('height', { mode: 'number' }),
-        focalX: numeric('focal_x', { mode: 'number' }),
-        focalY: numeric('focal_y', { mode: 'number' }),
     },
     (columns) => [
         uniqueIndex('articles_title_idx').on(columns.title),
@@ -167,7 +158,6 @@ export const articles = pgTable(
         index('articles_csv_sourc_file_itens_idx').on(columns.csvSourcFileItens),
         index('articles_updated_at_idx').on(columns.updatedAt),
         index('articles_created_at_idx').on(columns.createdAt),
-        uniqueIndex('articles_filename_idx').on(columns.filename),
     ],
 )
 
@@ -222,7 +212,7 @@ export const csv_data_rows_data = pgTable(
         _order: integer('_order').notNull(),
         _parentID: varchar('_parent_id').notNull(),
         id: varchar('id').primaryKey(),
-        value: varchar('value'),
+        data: varchar('data'),
     },
     (columns) => [
         index('csv_data_rows_data_order_idx').on(columns._order),

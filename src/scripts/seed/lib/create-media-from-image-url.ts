@@ -1,7 +1,8 @@
+import { Media } from '@/payload-types'
 import { faker } from '@faker-js/faker'
 import { Payload } from 'payload'
 
-export async function createMediaFromImageUrl(payload: Payload, imageUrl: string) {
+export async function createMediaFromImageUrl(payload: Payload, imageUrl: string): Promise<Media | undefined> {
     try {
         const res = await fetch(imageUrl)
         const arrBuffer = await res.arrayBuffer()
@@ -13,7 +14,7 @@ export async function createMediaFromImageUrl(payload: Payload, imageUrl: string
 
         if (!filename) throw new Error('Failed to extract filename')
 
-        return await payload.create({
+        const media = await payload.create({
             collection: 'media',
             draft: true,
             data: { alt: faker.lorem.words(3) },
@@ -24,6 +25,11 @@ export async function createMediaFromImageUrl(payload: Payload, imageUrl: string
                 size: filesize,
             },
         })
+
+        console.log("createMediaFromImageUrl() [MEDIA]");
+
+        return media
+
     } catch (error) {
         console.warn('Failed to seed media file', error)
     }

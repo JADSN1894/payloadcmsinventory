@@ -9,7 +9,7 @@ async function main() {
     const payload = await getPayloadClient()
     try {
         await seedAdmin(payload)
-        await seedCsvData(payload)
+        await seedCsvData(payload, ",")
         await seedArticleAuthor(payload)
         await seedArticles(payload)
         process.exit(0)

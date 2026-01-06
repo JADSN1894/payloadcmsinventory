@@ -3,12 +3,12 @@ import { parse } from 'csv-parse/sync';
 import fs from 'fs';
 import { faker } from "@faker-js/faker";
 
-export async function seedCsvData(payload: Payload) {
+export async function seedCsvData(payload: Payload, delimiter: (',' | ';' | '\t')) {
     try {
         const FILEPATH = 'src/scripts/seed/seeders/data.csv'
         const csvContent = fs.readFileSync(FILEPATH, 'utf8');
         const results = parse(csvContent, {
-            delimiter: ';',
+            delimiter,
             columns: false, // Return array of arrays
             trim: true,
         });
@@ -20,7 +20,7 @@ export async function seedCsvData(payload: Payload) {
 
         await payload.create({
             collection: "csv-data",
-            data: { delimiter: ";", headers, rows: payloadRows },
+            data: { delimiter, headers, rows: payloadRows },
             file: {
                 data: fs.readFileSync(FILEPATH),
                 mimetype: "text/csv",
