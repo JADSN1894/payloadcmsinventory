@@ -56,16 +56,7 @@ export async function up({ db, payload, req }: MigrateUpArgs): Promise<void> {
   	"status" "enum_articles_status" DEFAULT 'Draft' NOT NULL,
   	"published_at" timestamp(3) with time zone,
   	"updated_at" timestamp(3) with time zone DEFAULT now() NOT NULL,
-  	"created_at" timestamp(3) with time zone DEFAULT now() NOT NULL,
-  	"url" varchar,
-  	"thumbnail_u_r_l" varchar,
-  	"filename" varchar,
-  	"mime_type" varchar,
-  	"filesize" numeric,
-  	"width" numeric,
-  	"height" numeric,
-  	"focal_x" numeric,
-  	"focal_y" numeric
+  	"created_at" timestamp(3) with time zone DEFAULT now() NOT NULL
   );
   
   CREATE TABLE "article_authors" (
@@ -88,7 +79,7 @@ export async function up({ db, payload, req }: MigrateUpArgs): Promise<void> {
   	"_order" integer NOT NULL,
   	"_parent_id" varchar NOT NULL,
   	"id" varchar PRIMARY KEY NOT NULL,
-  	"value" varchar
+  	"data" varchar
   );
   
   CREATE TABLE "csv_data_rows" (
@@ -193,7 +184,6 @@ export async function up({ db, payload, req }: MigrateUpArgs): Promise<void> {
   CREATE INDEX "articles_csv_sourc_file_itens_idx" ON "articles" USING btree ("csv_sourc_file_itens_id");
   CREATE INDEX "articles_updated_at_idx" ON "articles" USING btree ("updated_at");
   CREATE INDEX "articles_created_at_idx" ON "articles" USING btree ("created_at");
-  CREATE UNIQUE INDEX "articles_filename_idx" ON "articles" USING btree ("filename");
   CREATE UNIQUE INDEX "article_authors_name_idx" ON "article_authors" USING btree ("name");
   CREATE INDEX "article_authors_avatar_idx" ON "article_authors" USING btree ("avatar_id");
   CREATE INDEX "article_authors_updated_at_idx" ON "article_authors" USING btree ("updated_at");

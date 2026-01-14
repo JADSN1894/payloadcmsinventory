@@ -443,60 +443,6 @@
           "primaryKey": false,
           "notNull": true,
           "default": "now()"
-        },
-        "url": {
-          "name": "url",
-          "type": "varchar",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "thumbnail_u_r_l": {
-          "name": "thumbnail_u_r_l",
-          "type": "varchar",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "filename": {
-          "name": "filename",
-          "type": "varchar",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "mime_type": {
-          "name": "mime_type",
-          "type": "varchar",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "filesize": {
-          "name": "filesize",
-          "type": "numeric",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "width": {
-          "name": "width",
-          "type": "numeric",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "height": {
-          "name": "height",
-          "type": "numeric",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "focal_x": {
-          "name": "focal_x",
-          "type": "numeric",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "focal_y": {
-          "name": "focal_y",
-          "type": "numeric",
-          "primaryKey": false,
-          "notNull": false
         }
       },
       "indexes": {
@@ -601,21 +547,6 @@
             }
           ],
           "isUnique": false,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        },
-        "articles_filename_idx": {
-          "name": "articles_filename_idx",
-          "columns": [
-            {
-              "expression": "filename",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": true,
           "concurrently": false,
           "method": "btree",
           "with": {}
@@ -900,8 +831,8 @@
           "primaryKey": true,
           "notNull": true
         },
-        "value": {
-          "name": "value",
+        "data": {
+          "name": "data",
           "type": "varchar",
           "primaryKey": false,
           "notNull": false
@@ -1915,6 +1846,6 @@
     "tables": {},
     "columns": {}
   },
-  "id": "33ff5c5a-34ae-441b-9239-90bf13242944",
+  "id": "09e7dadc-7c12-4a73-92d5-41de5c0abd13",
   "prevId": "00000000-0000-0000-0000-000000000000"
 }
